@@ -22,7 +22,7 @@ public class OptionsEntryValueBoolean extends OptionsEntryValue<Boolean> {
 
     @Override
     protected void drawValue(int entryWidth, int entryHeight, int x, int y, int mouseX, int mouseY, boolean selected, float partialTicks) {
-        this.button.x = entryWidth - 160;
+        this.button.x = x + entryWidth - 160;
         this.button.y = y + entryHeight / 6;
         this.button.setMessage(I18n.format("gui." + (value ? "yes" : "no")));
         this.button.render(mouseX, mouseY, partialTicks);

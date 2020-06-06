@@ -7,9 +7,9 @@ import net.minecraft.client.gui.widget.TextFieldWidget;
 import javax.annotation.ParametersAreNonnullByDefault;
 
 public class WatchedTextField extends TextFieldWidget {
-    private final OptionsEntryValueInput watcher;
+    private final OptionsEntryValueInput<?> watcher;
 
-    public WatchedTextField(OptionsEntryValueInput watcher, FontRenderer fontRenderer, int x, int y, int width, int height) {
+    public WatchedTextField(OptionsEntryValueInput<?> watcher, FontRenderer fontRenderer, int x, int y, int width, int height) {
         super(fontRenderer, x, y, width, height, "");
         this.watcher = watcher;
     }

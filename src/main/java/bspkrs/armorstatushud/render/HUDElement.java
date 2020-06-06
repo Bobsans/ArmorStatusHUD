@@ -3,12 +3,9 @@ package bspkrs.armorstatushud.render;
 import bspkrs.armorstatushud.config.Config;
 import bspkrs.armorstatushud.utils.ColorThreshold;
 import bspkrs.armorstatushud.utils.HUDUtils;
-import com.mojang.blaze3d.platform.GlStateManager;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.ItemRenderer;
-import net.minecraft.client.renderer.RenderHelper;
 import net.minecraft.item.ItemStack;
-import org.lwjgl.opengl.GL11;
 
 class HUDElement {
     private final Minecraft minecraft = Minecraft.getInstance();
@@ -34,6 +31,10 @@ class HUDElement {
         this.isArmor = isArmor;
 
         initSize();
+    }
+
+    public ItemStack getItemStack() {
+        return this.itemStack;
     }
 
     int width() {
@@ -76,35 +77,28 @@ class HUDElement {
 
     void renderToHud(int x, int y) {
         ItemRenderer itemRenderer = Minecraft.getInstance().getItemRenderer();
-        GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
-        GlStateManager.enableRescaleNormal();
-        GlStateManager.enableBlend();
-        GlStateManager.blendFuncSeparate(770, 771, 1, 0);
-        RenderHelper.enableGUIStandardItemLighting();
         itemRenderer.zLevel = 100.0F;
 
         if (Config.ALIGN_MODE.get().name().toLowerCase().contains("right")) {
             itemRenderer.renderItemAndEffectIntoGUI(itemStack, x - (iconWidth + padWidth), y);
-            HUDUtils.renderItemOverlayIntoGUI(minecraft.fontRenderer, itemStack, x - (iconWidth + padWidth), y, Config.SHOW_DAMAGE_OVERLAY.get(), Config.SHOW_ITEM_COUNT.get());
+            HUDUtils.renderItemOverlayIntoGUI(minecraft.fontRenderer, itemStack, x - (iconWidth + padWidth), y, itemRenderer.zLevel, Config.SHOW_DAMAGE_OVERLAY.get(), Config.SHOW_ITEM_COUNT.get());
 
-            RenderHelper.disableStandardItemLighting();
-            GlStateManager.disableRescaleNormal();
-            GlStateManager.disableBlend();
-
-            minecraft.fontRenderer.drawStringWithShadow(itemName + "\247r", x - (padWidth + iconWidth + padWidth) - itemNameWidth, y, 0xffffff);
-            minecraft.fontRenderer.drawStringWithShadow(itemDamage + "\247r", x - (padWidth + iconWidth + padWidth) - itemDamageWidth, y + (Config.ENABLE_ITEM_NAME.get() ? elementHeight / 2.0F : elementHeight / 4.0F), 0xffffff);
+            if (Config.ENABLE_ITEM_NAME.get()) {
+                minecraft.fontRenderer.drawStringWithShadow(itemName + "\247r", x - (iconWidth + padWidth * 2) - itemNameWidth, y, 0xffffff);
+                minecraft.fontRenderer.drawStringWithShadow(itemDamage + "\247r", x - (iconWidth + padWidth * 2) - itemDamageWidth, y + (elementHeight / 2.0F), 0xffffff);
+            } else {
+                minecraft.fontRenderer.drawStringWithShadow(itemDamage + "\247r", x - (iconWidth + padWidth * 2) - itemDamageWidth, y + (elementHeight / 4.0F), 0xffffff);
+            }
         } else {
             itemRenderer.renderItemAndEffectIntoGUI(itemStack, x, y);
-            HUDUtils.renderItemOverlayIntoGUI(minecraft.fontRenderer, itemStack, x, y, Config.SHOW_DAMAGE_OVERLAY.get(), Config.SHOW_ITEM_COUNT.get());
+            HUDUtils.renderItemOverlayIntoGUI(minecraft.fontRenderer, itemStack, x, y, itemRenderer.zLevel, Config.SHOW_DAMAGE_OVERLAY.get(), Config.SHOW_ITEM_COUNT.get());
 
-            RenderHelper.disableStandardItemLighting();
-            GlStateManager.disableRescaleNormal();
-            GlStateManager.disableBlend();
-
-            minecraft.fontRenderer.drawStringWithShadow(itemName + "\247r", x + iconWidth + padWidth, y, 0xffffff);
-            minecraft.fontRenderer.drawStringWithShadow(itemDamage + "\247r", x + iconWidth + padWidth, y + (Config.ENABLE_ITEM_NAME.get() ? elementHeight / 2.0F : elementHeight / 4.0F), 0xffffff);
+            if (Config.ENABLE_ITEM_NAME.get()) {
+                minecraft.fontRenderer.drawStringWithShadow(itemName + "\247r", x + iconWidth + padWidth, y, 0xffffff);
+                minecraft.fontRenderer.drawStringWithShadow(itemDamage + "\247r", x + iconWidth + padWidth, y + (elementHeight / 2.0F), 0xffffff);
+            } else {
+                minecraft.fontRenderer.drawStringWithShadow(itemDamage + "\247r", x + iconWidth + padWidth, y + (elementHeight / 4.0F), 0xffffff);
+            }
         }
-
-        GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
     }
 }

@@ -19,7 +19,7 @@ public abstract class OptionsEntryValueInput<T> extends OptionsEntryValue<T> {
 
     @Override
     protected void drawValue(int entryWidth, int entryHeight, int x, int y, int mouseX, int mouseY, boolean selected, float partialTicks) {
-        textField.x = entryWidth - 160;
+        textField.x = x + entryWidth - 160;
         textField.y = y + entryHeight / 6;
         textField.render(mouseX, mouseY, partialTicks);
     }

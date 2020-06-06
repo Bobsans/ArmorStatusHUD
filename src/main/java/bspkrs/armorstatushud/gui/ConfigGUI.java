@@ -92,7 +92,7 @@ public class ConfigGUI extends Screen {
                 return;
             }
 
-            OptionsEntryValue value = (OptionsEntryValue)entry;
+            OptionsEntryValue<?> value = (OptionsEntryValue<?>)entry;
 
             if (I18n.hasKey(value.getDescription())) {
                 int valueX = value.getX() + 10;

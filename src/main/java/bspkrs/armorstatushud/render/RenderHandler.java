@@ -50,9 +50,9 @@ class RenderHandler {
 
     private static int getX(int width) {
         if (Config.ALIGN_MODE.get().name().toLowerCase().contains("center")) {
-            return ((Minecraft.getInstance().mainWindow.getScaledWidth() / 2) - (width / 2)) + (Config.APPLY_X_OFFSET_TO_CENTER.get() ? Config.X_OFFSET.get() : 0);
+            return ((Minecraft.getInstance().getMainWindow().getScaledWidth() / 2) - (width / 2)) + (Config.APPLY_X_OFFSET_TO_CENTER.get() ? Config.X_OFFSET.get() : 0);
         } else if (Config.ALIGN_MODE.get().name().toLowerCase().contains("right")) {
-            return Minecraft.getInstance().mainWindow.getScaledWidth() - width - Config.X_OFFSET.get();
+            return Minecraft.getInstance().getMainWindow().getScaledWidth() - width - Config.X_OFFSET.get();
         } else {
             return Config.X_OFFSET.get();
         }
@@ -60,11 +60,11 @@ class RenderHandler {
 
     private static int getY(int rowCount, int height) {
         if (Config.ALIGN_MODE.get().name().toLowerCase().contains("middle")) {
-            return ((Minecraft.getInstance().mainWindow.getScaledHeight() / 2) - ((rowCount * height) / 2)) + (Config.APPLY_Y_OFFSET_TO_MIDDLE.get() ? Config.Y_OFFSET.get() : 0);
+            return ((Minecraft.getInstance().getMainWindow().getScaledHeight() / 2) - ((rowCount * height) / 2)) + (Config.APPLY_Y_OFFSET_TO_MIDDLE.get() ? Config.Y_OFFSET.get() : 0);
         } else if (Config.ALIGN_MODE.get().name().equalsIgnoreCase("bottomleft") || Config.ALIGN_MODE.get().name().equalsIgnoreCase("bottomright")) {
-            return Minecraft.getInstance().mainWindow.getScaledHeight() - (rowCount * height) - Config.Y_OFFSET.get();
+            return Minecraft.getInstance().getMainWindow().getScaledHeight() - (rowCount * height) - Config.Y_OFFSET.get();
         } else if (Config.ALIGN_MODE.get().name().equalsIgnoreCase("bottomcenter")) {
-            return Minecraft.getInstance().mainWindow.getScaledHeight() - (rowCount * height) - Config.Y_OFFSET_BOTTOM_CENTER.get();
+            return Minecraft.getInstance().getMainWindow().getScaledHeight() - (rowCount * height) - Config.Y_OFFSET_BOTTOM_CENTER.get();
         } else {
             return Config.Y_OFFSET.get();
         }
@@ -73,19 +73,21 @@ class RenderHandler {
     private static void getHUDElements(Minecraft minecraft) {
         elements.clear();
 
-        for (int i = 3; i >= -2; i--) {
-            ItemStack itemStack = null;
+        if (minecraft.player != null) {
+            for (int i = 3; i >= -2; i--) {
+                ItemStack stack = null;
 
-            if (i == -1 && Config.SHOW_EQUIPPED_ITEM.get()) {
-                itemStack = minecraft.player.getHeldItemMainhand();
-            } else if (i == -2 && Config.SHOW_OFFHAND_ITEM.get()) {
-                itemStack = minecraft.player.getHeldItemOffhand();
-            } else if (i != -1 && i != -2) {
-                itemStack = minecraft.player.inventory.armorInventory.get(i);
-            }
+                if (i == -1 && Config.SHOW_EQUIPPED_ITEM.get()) {
+                    stack = minecraft.player.getHeldItemMainhand();
+                } else if (i == -2 && Config.SHOW_OFFHAND_ITEM.get()) {
+                    stack = minecraft.player.getHeldItemOffhand();
+                } else if (i != -1 && i != -2) {
+                    stack = minecraft.player.inventory.armorInventory.get(i);
+                }
 
-            if (itemStack != null) {
-                elements.add(new HUDElement(itemStack, 16, 16, 2, i > -1));
+                if (stack != null && !stack.isEmpty()) {
+                    elements.add(new HUDElement(stack, 16, 16, 2, i > -1));
+                }
             }
         }
     }

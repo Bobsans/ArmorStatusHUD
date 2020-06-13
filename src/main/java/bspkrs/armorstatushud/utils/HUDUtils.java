@@ -15,12 +15,11 @@ import net.minecraft.item.Items;
 import org.lwjgl.opengl.GL11;
 
 public class HUDUtils {
-
     public static void renderItemOverlayIntoGUI(FontRenderer fontRenderer, ItemStack stack, int x, int y, double zLevel, boolean showDamageBar, boolean showCount) {
         if (!stack.isEmpty() && (showDamageBar || showCount)) {
             if (stack.isDamaged() && showDamageBar) {
-                int dmgWidth = (int)Math.round(13.0D - ((stack.getDamage() * 13.0D) / stack.getMaxDamage()));
-                int dmgColor = (int)Math.round(255.0D - ((stack.getDamage() * 255.0D) / stack.getMaxDamage()));
+                int dmgWidth = (int) Math.round(13.0D - ((stack.getDamage() * 13.0D) / stack.getMaxDamage()));
+                int dmgColor = (int) Math.round(255.0D - ((stack.getDamage() * 255.0D) / stack.getMaxDamage()));
                 int dmgColorHex = 255 - dmgColor << 16 | dmgColor << 8;
                 int dmgShadowHex = (255 - dmgColor) / 4 << 16 | 16128;
 
@@ -38,8 +37,6 @@ public class HUDUtils {
                 RenderSystem.enableAlphaTest();
                 RenderSystem.enableTexture();
                 RenderSystem.enableDepthTest();
-
-                GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
             }
 
             if (showCount) {

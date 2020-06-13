@@ -1,8 +1,9 @@
 package bspkrs.armorstatushud.commands;
 
 import bspkrs.armorstatushud.Reference;
-import bspkrs.armorstatushud.network.Networking;
-import bspkrs.armorstatushud.network.client.PacketShowConfigGUI;
+import bspkrs.armorstatushud.network.ShowConfigGUIMessage;
+import by.bobsans.boblib.network.NetworkingManager;
+import com.mojang.brigadier.Command;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.minecraft.command.CommandSource;
@@ -12,11 +13,12 @@ import net.minecraftforge.fml.network.NetworkDirection;
 
 public class CommandArmorStatus {
     public static void register(CommandDispatcher<CommandSource> dispatcher) {
-        dispatcher.register(Commands.literal(Reference.MODID).executes(context -> showConfig(context.getSource())));
+        dispatcher.register(Commands.literal(Reference.MODID).executes((context) -> showConfig(context.getSource())));
     }
 
     private static int showConfig(CommandSource source) throws CommandSyntaxException {
-        Networking.CHANNEL.sendTo(new PacketShowConfigGUI(), source.asPlayer().connection.netManager, NetworkDirection.PLAY_TO_CLIENT);
-        return 1;
+        NetworkingManager.CHANNEL.sendTo(new ShowConfigGUIMessage(ShowConfigGUIMessage.SHOW), source.asPlayer().connection.netManager, NetworkDirection.PLAY_TO_CLIENT);
+
+        return Command.SINGLE_SUCCESS;
     }
 }

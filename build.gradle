@@ -11,6 +11,17 @@ buildscript {
 apply plugin: 'net.minecraftforge.gradle'
 apply plugin: 'idea'
 
+repositories {
+    maven {
+        name = "GitHubPackages"
+        url = uri('https://maven.pkg.github.com/Bobsans/BobLib')
+        credentials {
+            username = project.findProperty("gpr.user") ?: System.getenv("USERNAME")
+            password = project.findProperty("gpr.key") ?: System.getenv("TOKEN")
+        }
+    }
+}
+
 version = mod_version
 group = group_name
 archivesBaseName = "[${minecraft_version}] ${mod_name}"
@@ -22,50 +33,59 @@ minecraft {
 
     runs {
         client {
-            workingDirectory project.file('run')
-
-            property 'forge.logging.markers', 'SCAN,REGISTRIES,REGISTRYDUMP'
-            property 'forge.logging.console.level', 'info'
-
-            mods {
-                armorstatushud {
-                    source sourceSets.main
-                }
-            }
+            properties 'forge.logging.markers': 'SCAN,REGISTRIES,REGISTRYDUMP'
+            properties 'forge.logging.console.level': 'info'
+            workingDirectory project.file('run').canonicalPath
+            source sourceSets.main
         }
 
         server {
-            workingDirectory project.file('run')
-
-            property 'forge.logging.markers', 'SCAN,REGISTRIES,REGISTRYDUMP'
-            property 'forge.logging.console.level', 'debug'
-
-            mods {
-                armorstatushud {
-                    source sourceSets.main
-                }
-            }
+            properties 'forge.logging.markers': 'SCAN,REGISTRIES,REGISTRYDUMP'
+            properties 'forge.logging.console.level': 'info'
+            workingDirectory project.file('run').canonicalPath
+            source sourceSets.main
         }
 
         data {
-            workingDirectory project.file('run')
-
-            property 'forge.logging.markers', 'SCAN,REGISTRIES,REGISTRYDUMP'
-            property 'forge.logging.console.level', 'debug'
-
+            properties 'forge.logging.markers': 'SCAN,REGISTRIES,REGISTRYDUMP'
+            properties 'forge.logging.console.level': 'debug'
             args '--mod', 'armorstatushud', '--all', '--output', file('src/generated/resources/')
-
-            mods {
-                armorstatushud {
-                    source sourceSets.main
-                }
-            }
+            workingDirectory project.file('run').canonicalPath
+            source sourceSets.main
         }
     }
 }
 
 dependencies {
     minecraft "net.minecraftforge:forge:${minecraft_version}-${forge_version}"
+    compile fg.deobf("by.bobsans.boblib:BobLib:${boblib_version}")
+}
+
+processResources {
+    from(sourceSets.main.resources.srcDirs) {
+        include '**/mods.toml'
+
+        expand([
+            'mod_id'               : mod_id,
+            'mod_version'          : mod_version,
+            'mod_name'             : mod_name,
+            'mod_author'           : mod_author,
+            'mod_url'              : mod_url,
+            'mod_update_url'       : mod_update_url,
+            'mod_credits'          : mod_credits,
+            'mod_description'      : mod_description,
+            'boblib_version'       : boblib_version,
+            'boblib_version_map'   : boblib_version_map,
+            'minecraft_version'    : minecraft_version,
+            'minecraft_version_map': minecraft_version_map,
+            'forge_version'        : forge_version,
+            'forge_version_map'    : forge_version_map
+        ])
+    }
+
+    from(sourceSets.main.resources.srcDirs) {
+        exclude '**/mods.toml'
+    }
 }
 
 jar {

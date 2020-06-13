@@ -25,9 +25,9 @@ loaderVersion="${forge_version_map}"
         ordering="NONE"
         side="BOTH"
 
-    [[dependencies.simplehomes]]
+    [[dependencies.armorstatushud]]
         modId="boblib"
-        mandatory=false
+        mandatory=true
         versionRange="${boblib_version_map}"
-        ordering="BEFORE"
+        ordering="NONE"
         side="BOTH"

@@ -1,8 +1,8 @@
 package bspkrs.armorstatushud.commands;
 
 import bspkrs.armorstatushud.Reference;
+import bspkrs.armorstatushud.network.NetworkingManager;
 import bspkrs.armorstatushud.network.ShowConfigGUIMessage;
-import by.bobsans.boblib.network.NetworkingManager;
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;

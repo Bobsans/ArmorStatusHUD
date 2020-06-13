@@ -16,15 +16,14 @@ import java.util.Objects;
 
 public class HUDUtils {
 
-    public static void renderItemOverlayIntoGUI(FontRenderer fontRenderer, ItemStack itemStack, int x, int y, boolean showDamageBar, boolean showCount) {
-        if (itemStack != null && showDamageBar || showCount) {
-            if (Objects.requireNonNull(itemStack).isDamaged() && showDamageBar) {
-                int dmgWidth = (int)Math.round(13.0D - ((itemStack.getDamage() * 13.0D) / itemStack.getMaxDamage()));
-                int dmgColor = (int)Math.round(255.0D - ((itemStack.getDamage() * 255.0D) / itemStack.getMaxDamage()));
+    public static void renderItemOverlayIntoGUI(FontRenderer fontRenderer, ItemStack stack, int x, int y, float zLevel, boolean showDamageBar, boolean showCount) {
+        if (!stack.isEmpty() && showDamageBar || showCount) {
+            if (Objects.requireNonNull(stack).isDamaged() && showDamageBar) {
+                int dmgWidth = (int) Math.round(13.0D - ((stack.getDamage() * 13.0D) / stack.getMaxDamage()));
+                int dmgColor = (int) Math.round(255.0D - ((stack.getDamage() * 255.0D) / stack.getMaxDamage()));
                 int dmgColorHex = 255 - dmgColor << 16 | dmgColor << 8;
                 int dmgShadowHex = (255 - dmgColor) / 4 << 16 | 16128;
 
-                GlStateManager.disableLighting();
                 GlStateManager.disableDepthTest();
                 GlStateManager.disableTexture();
                 GlStateManager.disableAlphaTest();
@@ -35,24 +34,26 @@ public class HUDUtils {
                 renderQuad(tessellator, x + 2, y + 13, 12, 1, dmgShadowHex);
                 renderQuad(tessellator, x + 2, y + 13, dmgWidth, 1, dmgColorHex);
 
+                GlStateManager.enableBlend();
                 GlStateManager.enableAlphaTest();
                 GlStateManager.enableTexture();
-                GlStateManager.enableLighting();
                 GlStateManager.enableDepthTest();
-                GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
             }
 
             if (showCount) {
                 int count = 0;
 
-                if (itemStack.getMaxStackSize() > 1) {
-                    count = HUDUtils.countInInventory(Minecraft.getInstance().player, itemStack.getItem(), itemStack.getDamage());
-                } else if (itemStack.getItem().equals(Items.BOW)) {
-                    count = HUDUtils.countInInventory(Minecraft.getInstance().player, Items.ARROW);
+                if (Minecraft.getInstance().player != null) {
+                    if (stack.getMaxStackSize() > 1) {
+                        count = HUDUtils.countInInventory(Minecraft.getInstance().player, stack.getItem(), stack.getDamage());
+                    } else if (stack.getItem().equals(Items.BOW)) {
+                        count = HUDUtils.countInInventory(Minecraft.getInstance().player, Items.ARROW);
+                    }
                 }
 
                 if (count > 1) {
-                    String countString = "" + count;
+                    String countString = String.valueOf(count);
+
                     GlStateManager.disableLighting();
                     GlStateManager.disableDepthTest();
                     GlStateManager.disableBlend();
@@ -85,8 +86,11 @@ public class HUDUtils {
 
     private static int countInInventory(PlayerEntity player, Item item, int md) {
         int count = 0;
-        for (ItemStack itemStack : player.inventory.mainInventory) {
-            if (!itemStack.isEmpty() && item.equals(itemStack.getItem()) && (md == -1 || itemStack.getDamage() == md)) { count += itemStack.getCount(); }
+
+        for (ItemStack stack : player.inventory.mainInventory) {
+            if (!stack.isEmpty() && item.equals(stack.getItem()) && (md == -1 || stack.getDamage() == md)) {
+                count += stack.getCount();
+            }
         }
 
         return count;

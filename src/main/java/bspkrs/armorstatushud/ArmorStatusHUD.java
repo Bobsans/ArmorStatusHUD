@@ -2,10 +2,11 @@ package bspkrs.armorstatushud;
 
 import bspkrs.armorstatushud.commands.CommandArmorStatus;
 import bspkrs.armorstatushud.config.Config;
-import bspkrs.armorstatushud.network.Networking;
+import bspkrs.armorstatushud.network.ShowConfigGUIMessage;
 import bspkrs.armorstatushud.proxy.ClientProxy;
 import bspkrs.armorstatushud.proxy.IProxy;
 import bspkrs.armorstatushud.proxy.ServerProxy;
+import by.bobsans.boblib.network.NetworkingManager;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.DistExecutor;
@@ -32,7 +33,7 @@ public class ArmorStatusHUD {
     }
 
     private void setup(final FMLCommonSetupEvent event) {
-        Networking.registerMessages();
+        NetworkingManager.registerMessage(ShowConfigGUIMessage.class, ShowConfigGUIMessage::write, ShowConfigGUIMessage::read, ShowConfigGUIMessage.Handler::onMessage);
 
         proxy.setup(event);
     }

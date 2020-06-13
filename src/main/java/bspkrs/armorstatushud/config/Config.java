@@ -66,7 +66,6 @@ public class Config extends ConfigBase {
 
     public static void register(final ModLoadingContext context) {
         context.registerConfig(ModConfig.Type.CLIENT, spec);
-
         loadConfig(spec, FMLPaths.CONFIGDIR.get().resolve(Reference.MODID + "-client.toml"));
     }
 

@@ -29,5 +29,5 @@ loaderVersion="${forge_version_map}"
         modId="boblib"
         mandatory=true
         versionRange="${boblib_version_map}"
-        ordering="AFTER"
+        ordering="NONE"
         side="BOTH"

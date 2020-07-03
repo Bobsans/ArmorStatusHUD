@@ -49,7 +49,7 @@ class HUDElement {
             int maxDamage;
 
             if (((isArmor && Config.GENERAL.SHOW_ARMOR_DAMAGE.get()) || (!isArmor && Config.GENERAL.SHOW_ITEM_DAMAGE.get())) && itemStack.isDamageable()) {
-                maxDamage = itemStack.getMaxDamage() + 1;
+                maxDamage = itemStack.getMaxDamage();
                 damage = maxDamage - itemStack.getDamage();
 
                 if (Config.GENERAL.DAMAGE_DISPLAY_TYPE.get() == Config.DamageDisplayType.VALUE) {

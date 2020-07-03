@@ -13,6 +13,6 @@ public class ClientProxy implements IProxy {
     public void setup(final FMLCommonSetupEvent event) {
         MinecraftForge.EVENT_BUS.register(new RenderTicker(Minecraft.getInstance()));
 
-        ModList.get().getModContainerById(Reference.MODID).ifPresent(consumer -> consumer.registerExtensionPoint(ExtensionPoint.CONFIGGUIFACTORY, () -> (mc, parent) -> new ConfigGUI(parent)));
+        ModList.get().getModContainerById(Reference.MODID).ifPresent((consumer) -> consumer.registerExtensionPoint(ExtensionPoint.CONFIGGUIFACTORY, () -> (mc, parent) -> new ConfigGUI(parent)));
     }
 }

@@ -3,6 +3,7 @@ package bspkrs.armorstatushud.render;
 import bspkrs.armorstatushud.ArmorStatusHUD;
 import bspkrs.armorstatushud.config.Config;
 import bspkrs.armorstatushud.utils.ColorThreshold;
+import com.mojang.blaze3d.matrix.MatrixStack;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screen.ChatScreen;
 import net.minecraft.item.ItemStack;
@@ -39,7 +40,7 @@ class RenderHandler {
     }
 
     static boolean onTickInGame(Minecraft minecraft) {
-        if (Config.GENERAL.ENABLED.get() && (minecraft.currentScreen == null || ((minecraft.currentScreen instanceof ChatScreen) && Config.GENERAL.SHOW_IN_CHAT.get())) && !minecraft.gameSettings.showDebugInfo) {
+        if (Config.GENERAL.ENABLED.get() && (minecraft.screen == null || ((minecraft.screen instanceof ChatScreen) && Config.GENERAL.SHOW_IN_CHAT.get())) /*&& !minecraft.gameSettings.showDebugInfo*/) {
             GL11.glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
             displayArmorStatus(minecraft);
             GL11.glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
@@ -50,9 +51,9 @@ class RenderHandler {
 
     private static int getX(int width) {
         if (Config.GENERAL.ALIGN_MODE.get().name().toLowerCase().contains("center")) {
-            return ((Minecraft.getInstance().getMainWindow().getScaledWidth() / 2) - (width / 2)) + (Config.GENERAL.APPLY_X_OFFSET_TO_CENTER.get() ? Config.GENERAL.X_OFFSET.get() : 0);
+            return ((Minecraft.getInstance().getWindow().getGuiScaledWidth() / 2) - (width / 2)) + (Config.GENERAL.APPLY_X_OFFSET_TO_CENTER.get() ? Config.GENERAL.X_OFFSET.get() : 0);
         } else if (Config.GENERAL.ALIGN_MODE.get().name().toLowerCase().contains("right")) {
-            return Minecraft.getInstance().getMainWindow().getScaledWidth() - width - Config.GENERAL.X_OFFSET.get();
+            return Minecraft.getInstance().getWindow().getGuiScaledWidth() - width - Config.GENERAL.X_OFFSET.get();
         } else {
             return Config.GENERAL.X_OFFSET.get();
         }
@@ -60,11 +61,11 @@ class RenderHandler {
 
     private static int getY(int rowCount, int height) {
         if (Config.GENERAL.ALIGN_MODE.get().name().toLowerCase().contains("middle")) {
-            return ((Minecraft.getInstance().getMainWindow().getScaledHeight() / 2) - ((rowCount * height) / 2)) + (Config.GENERAL.APPLY_Y_OFFSET_TO_MIDDLE.get() ? Config.GENERAL.Y_OFFSET.get() : 0);
+            return ((Minecraft.getInstance().getWindow().getGuiScaledHeight() / 2) - ((rowCount * height) / 2)) + (Config.GENERAL.APPLY_Y_OFFSET_TO_MIDDLE.get() ? Config.GENERAL.Y_OFFSET.get() : 0);
         } else if (Config.GENERAL.ALIGN_MODE.get().name().equalsIgnoreCase("bottomleft") || Config.GENERAL.ALIGN_MODE.get().name().equalsIgnoreCase("bottomright")) {
-            return Minecraft.getInstance().getMainWindow().getScaledHeight() - (rowCount * height) - Config.GENERAL.Y_OFFSET.get();
+            return Minecraft.getInstance().getWindow().getGuiScaledHeight() - (rowCount * height) - Config.GENERAL.Y_OFFSET.get();
         } else if (Config.GENERAL.ALIGN_MODE.get().name().equalsIgnoreCase("bottomcenter")) {
-            return Minecraft.getInstance().getMainWindow().getScaledHeight() - (rowCount * height) - Config.GENERAL.Y_OFFSET_BOTTOM_CENTER.get();
+            return Minecraft.getInstance().getWindow().getGuiScaledHeight() - (rowCount * height) - Config.GENERAL.Y_OFFSET_BOTTOM_CENTER.get();
         } else {
             return Config.GENERAL.Y_OFFSET.get();
         }
@@ -78,11 +79,11 @@ class RenderHandler {
                 ItemStack stack = null;
 
                 if (i == -1 && Config.GENERAL.SHOW_EQUIPPED_ITEM.get()) {
-                    stack = minecraft.player.getHeldItemMainhand();
+                    stack = minecraft.player.getMainHandItem();
                 } else if (i == -2 && Config.GENERAL.SHOW_OFFHAND_ITEM.get()) {
-                    stack = minecraft.player.getHeldItemOffhand();
+                    stack = minecraft.player.getOffhandItem();
                 } else if (i != -1 && i != -2) {
-                    stack = minecraft.player.inventory.armorInventory.get(i);
+                    stack = minecraft.player.inventory.armor.get(i);
                 }
 
                 if (stack != null && !stack.isEmpty()) {
@@ -104,18 +105,20 @@ class RenderHandler {
 
             if (Config.GENERAL.LIST_MODE.get() == Config.ListMode.VERTICAL) {
                 int yBase = getY(elements.size(), yOffset);
+                MatrixStack matrixstack = new MatrixStack();
 
                 for (HUDElement element : elements) {
-                    element.renderToHud(Config.GENERAL.ALIGN_MODE.get().name().toLowerCase().contains("right") ? getX(0) : getX(element.width()), yBase);
+                    element.renderToHud(matrixstack, Config.GENERAL.ALIGN_MODE.get().name().toLowerCase().contains("right") ? getX(0) : getX(element.width()), yBase);
                     yBase += yOffset;
                 }
             } else if (Config.GENERAL.LIST_MODE.get() == Config.ListMode.HORIZONTAL) {
                 int xBase = getX(getElementsWidth());
                 int yBase = getY(1, yOffset);
                 int prevX = 0;
+                MatrixStack matrixstack = new MatrixStack();
 
                 for (HUDElement element : elements) {
-                    element.renderToHud(xBase + prevX + (Config.GENERAL.ALIGN_MODE.get().name().toLowerCase().contains("right") ? element.width() : 0), yBase);
+                    element.renderToHud(matrixstack, xBase + prevX + (Config.GENERAL.ALIGN_MODE.get().name().toLowerCase().contains("right") ? element.width() : 0), yBase);
                     prevX += element.width();
                 }
             }

@@ -15,8 +15,19 @@ public class NetworkingManager {
     }
 
     public static void init() {
-        CHANNEL = NetworkRegistry.newSimpleChannel(new ResourceLocation(Reference.MODID, "main"), () -> Reference.VERSION, (s) -> true, (s) -> true);
+        CHANNEL = NetworkRegistry.newSimpleChannel(
+            new ResourceLocation(Reference.MODID, "main"),
+            () -> Reference.VERSION,
+            (s) -> true,
+            (s) -> true
+        );
 
-        CHANNEL.registerMessage(nextId(), ShowConfigGUIMessage.class, ShowConfigGUIMessage::write, ShowConfigGUIMessage::read, ShowConfigGUIMessage.Handler::onMessage);
+        CHANNEL.registerMessage(
+            nextId(),
+            ShowConfigGUIMessage.class,
+            ShowConfigGUIMessage::write,
+            ShowConfigGUIMessage::read,
+            ShowConfigGUIMessage.Handler::onMessage
+        );
     }
 }

@@ -13,11 +13,19 @@ import net.minecraftforge.fml.network.NetworkDirection;
 
 public class CommandArmorStatus {
     public static void register(CommandDispatcher<CommandSource> dispatcher) {
-        dispatcher.register(Commands.literal(Reference.MODID).executes((context) -> showConfig(context.getSource())));
+        dispatcher.register(
+            Commands
+                .literal(Reference.MODID)
+                .executes((context) -> showConfig(context.getSource()))
+        );
     }
 
     private static int showConfig(CommandSource source) throws CommandSyntaxException {
-        NetworkingManager.CHANNEL.sendTo(new ShowConfigGUIMessage(ShowConfigGUIMessage.SHOW), source.asPlayer().connection.netManager, NetworkDirection.PLAY_TO_CLIENT);
+        NetworkingManager.CHANNEL.sendTo(
+            new ShowConfigGUIMessage(ShowConfigGUIMessage.SHOW),
+            source.getPlayerOrException().connection.getConnection(),
+            NetworkDirection.PLAY_TO_CLIENT
+        );
 
         return Command.SINGLE_SUCCESS;
     }

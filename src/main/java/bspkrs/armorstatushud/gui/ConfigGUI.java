@@ -17,7 +17,7 @@ public class ConfigGUI extends ConfigScreenBase {
     }
 
     public static void open() {
-        Minecraft.getInstance().displayGuiScreen(new ConfigGUI(null));
+        Minecraft.getInstance().setScreen(new ConfigGUI(Minecraft.getInstance().screen));
     }
 
     protected OptionsListWidget fillOptions(OptionsListWidget widget) {

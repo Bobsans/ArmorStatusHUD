@@ -7,12 +7,12 @@ import bspkrs.armorstatushud.proxy.ClientProxy;
 import bspkrs.armorstatushud.proxy.IProxy;
 import bspkrs.armorstatushud.proxy.ServerProxy;
 import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.event.RegisterCommandsEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.DistExecutor;
 import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
-import net.minecraftforge.fml.event.server.FMLServerStartingEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -21,7 +21,7 @@ import org.apache.logging.log4j.Logger;
 public class ArmorStatusHUD {
     public static final Logger LOGGER = LogManager.getLogger();
 
-    private static final IProxy proxy = DistExecutor.runForDist(() -> ClientProxy::new, () -> ServerProxy::new);
+    private static final IProxy proxy = DistExecutor.safeRunForDist(() -> ClientProxy::new, () -> ServerProxy::new);
 
     public ArmorStatusHUD() {
         Config.register(ModLoadingContext.get());
@@ -37,7 +37,7 @@ public class ArmorStatusHUD {
     }
 
     @SubscribeEvent
-    public void onServerStarting(FMLServerStartingEvent event) {
-        CommandArmorStatus.register(event.getCommandDispatcher());
+    public void onRegisterCommands(RegisterCommandsEvent event) {
+        CommandArmorStatus.register(event.getDispatcher());
     }
 }

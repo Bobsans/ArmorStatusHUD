@@ -12,14 +12,16 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
+import net.minecraft.util.text.ITextComponent;
+import net.minecraft.util.text.StringTextComponent;
 import org.lwjgl.opengl.GL11;
 
 public class HUDUtils {
     public static void renderItemOverlayIntoGUI(FontRenderer fontRenderer, ItemStack stack, int x, int y, double zLevel, boolean showDamageBar, boolean showCount) {
         if (!stack.isEmpty() && (showDamageBar || showCount)) {
             if (stack.isDamaged() && showDamageBar) {
-                int dmgWidth = (int) Math.round(13.0D - ((stack.getDamage() * 13.0D) / stack.getMaxDamage()));
-                int dmgColor = (int) Math.round(255.0D - ((stack.getDamage() * 255.0D) / stack.getMaxDamage()));
+                int dmgWidth = (int) Math.round(13.0D - ((stack.getDamageValue() * 13.0D) / stack.getMaxDamage()));
+                int dmgColor = (int) Math.round(255.0D - ((stack.getDamageValue() * 255.0D) / stack.getMaxDamage()));
                 int dmgColorHex = 255 - dmgColor << 16 | dmgColor << 8;
                 int dmgShadowHex = (255 - dmgColor) / 4 << 16 | 16128;
 
@@ -44,7 +46,7 @@ public class HUDUtils {
 
                 if (Minecraft.getInstance().player != null) {
                     if (stack.getMaxStackSize() > 1) {
-                        count = HUDUtils.countInInventory(Minecraft.getInstance().player, stack.getItem(), stack.getDamage());
+                        count = HUDUtils.countInInventory(Minecraft.getInstance().player, stack.getItem(), stack.getDamageValue());
                     } else if (stack.getItem().equals(Items.BOW)) {
                         count = HUDUtils.countInInventory(Minecraft.getInstance().player, Items.ARROW);
                     }
@@ -55,9 +57,9 @@ public class HUDUtils {
 
                     MatrixStack matrixstack = new MatrixStack();
                     matrixstack.translate(0.0D, 0.0D, zLevel + 200.0D);
-                    IRenderTypeBuffer.Impl buffer = IRenderTypeBuffer.getImpl(Tessellator.getInstance().getBuffer());
-                    fontRenderer.renderString(countString, (x + 19) - 2 - fontRenderer.getStringWidth(countString), y + 6 + 3, 16777215, true, matrixstack.getLast().getMatrix(), buffer, false, 0, 15728880);
-                    buffer.finish();
+                    IRenderTypeBuffer.Impl buffer = IRenderTypeBuffer.immediate(Tessellator.getInstance().getBuilder());
+                    fontRenderer.draw(matrixstack, countString, (x + 19) - 2 - fontRenderer.width(countString), y + 6 + 3, 16777215);
+                    buffer.endBatch();
                 }
             }
         }
@@ -69,13 +71,13 @@ public class HUDUtils {
         int b = color & 255;
         int a = 255;
 
-        BufferBuilder buffer = tessellator.getBuffer();
+        BufferBuilder buffer = tessellator.getBuilder();
         buffer.begin(GL11.GL_QUADS, DefaultVertexFormats.POSITION_COLOR);
-        buffer.pos(x, y, 0.0D).color(r, g, b, a).endVertex();
-        buffer.pos(x, y + height, 0.0D).color(r, g, b, a).endVertex();
-        buffer.pos(x + width, y + height, 0.0D).color(r, g, b, a).endVertex();
-        buffer.pos(x + width, y, 0.0D).color(r, g, b, a).endVertex();
-        tessellator.draw();
+        buffer.vertex(x, y, 0.0D).color(r, g, b, a).endVertex();
+        buffer.vertex(x, y + height, 0.0D).color(r, g, b, a).endVertex();
+        buffer.vertex(x + width, y + height, 0.0D).color(r, g, b, a).endVertex();
+        buffer.vertex(x + width, y, 0.0D).color(r, g, b, a).endVertex();
+        tessellator.end();
     }
 
     private static int countInInventory(PlayerEntity player, Item item) {
@@ -85,8 +87,8 @@ public class HUDUtils {
     private static int countInInventory(PlayerEntity player, Item item, int md) {
         int count = 0;
 
-        for (ItemStack stack : player.inventory.mainInventory) {
-            if (!stack.isEmpty() && item.equals(stack.getItem()) && (md == -1 || stack.getDamage() == md)) {
+        for (ItemStack stack : player.inventory.items) {
+            if (!stack.isEmpty() && item.equals(stack.getItem()) && (md == -1 || stack.getDamageValue() == md)) {
                 count += stack.getCount();
             }
         }
@@ -94,7 +96,7 @@ public class HUDUtils {
         return count;
     }
 
-    public static String stripCtrl(String s) {
-        return s.replaceAll("(?i)\247[0-9a-fklmnor]", "");
+    public static <T extends ITextComponent> StringTextComponent stripCtrl(T text) {
+        return new StringTextComponent(text.getString().replaceAll("(?i)\247[0-9a-fklmnor]", ""));
     }
 }

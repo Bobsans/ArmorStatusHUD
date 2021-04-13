@@ -3,9 +3,12 @@ package bspkrs.armorstatushud.render;
 import bspkrs.armorstatushud.config.Config;
 import bspkrs.armorstatushud.utils.ColorThreshold;
 import bspkrs.armorstatushud.utils.HUDUtils;
+import com.mojang.blaze3d.matrix.MatrixStack;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.ItemRenderer;
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.text.ITextComponent;
+import net.minecraft.util.text.StringTextComponent;
 
 class HUDElement {
     private final Minecraft minecraft = Minecraft.getInstance();
@@ -18,7 +21,7 @@ class HUDElement {
 
     private int elementWidth;
     private int elementHeight;
-    private String itemName = "";
+    private ITextComponent itemName = new StringTextComponent("");
     private int itemNameWidth;
     private String itemDamage = "";
     private int itemDamageWidth;
@@ -42,15 +45,15 @@ class HUDElement {
     }
 
     private void initSize() {
-        elementHeight = Config.GENERAL.ENABLE_ITEM_NAME.get() ? Math.max(Minecraft.getInstance().fontRenderer.FONT_HEIGHT * 2, iconHeight) : Math.max(minecraft.fontRenderer.FONT_HEIGHT, iconHeight);
+        elementHeight = Config.GENERAL.ENABLE_ITEM_NAME.get() ? Math.max(Minecraft.getInstance().font.lineHeight * 2, iconHeight) : Math.max(minecraft.font.lineHeight, iconHeight);
 
         if (itemStack != null) {
             int damage;
             int maxDamage;
 
-            if (((isArmor && Config.GENERAL.SHOW_ARMOR_DAMAGE.get()) || (!isArmor && Config.GENERAL.SHOW_ITEM_DAMAGE.get())) && itemStack.isDamageable()) {
+            if (((isArmor && Config.GENERAL.SHOW_ARMOR_DAMAGE.get()) || (!isArmor && Config.GENERAL.SHOW_ITEM_DAMAGE.get())) && itemStack.isDamageableItem()) {
                 maxDamage = itemStack.getMaxDamage();
-                damage = maxDamage - itemStack.getDamage();
+                damage = maxDamage - itemStack.getDamageValue();
 
                 if (Config.GENERAL.DAMAGE_DISPLAY_TYPE.get() == Config.DamageDisplayType.VALUE) {
                     itemDamage = "\247" + ColorThreshold.getColorCode(RenderHandler.getColorList(), (Config.GENERAL.DAMAGE_THRESHOLD_TYPE.get() == Config.DamageTresholdType.PERCENT ? (damage * 100) / maxDamage : damage)) + damage + (Config.GENERAL.SHOW_MAX_DAMAGE.get() ? "/" + maxDamage : "");
@@ -59,41 +62,41 @@ class HUDElement {
                 }
             }
 
-            itemDamageWidth = minecraft.fontRenderer.getStringWidth(HUDUtils.stripCtrl(itemDamage));
+            itemDamageWidth = minecraft.font.width(HUDUtils.stripCtrl(new StringTextComponent(itemDamage)));
             elementWidth = padWidth + iconWidth + padWidth + itemDamageWidth;
 
             if (Config.GENERAL.ENABLE_ITEM_NAME.get()) {
-                itemName = itemStack.getDisplayName().getFormattedText();
-                elementWidth = padWidth + iconWidth + padWidth + Math.max(minecraft.fontRenderer.getStringWidth(HUDUtils.stripCtrl(itemName)), itemDamageWidth);
+                itemName = itemStack.getDisplayName();
+                elementWidth = padWidth + iconWidth + padWidth + Math.max(minecraft.font.width(HUDUtils.stripCtrl(itemName)), itemDamageWidth);
             }
 
-            itemNameWidth = minecraft.fontRenderer.getStringWidth(HUDUtils.stripCtrl(itemName));
+            itemNameWidth = minecraft.font.width(HUDUtils.stripCtrl(itemName));
         }
     }
 
-    void renderToHud(int x, int y) {
+    void renderToHud(MatrixStack stack, int x, int y) {
         ItemRenderer itemRenderer = Minecraft.getInstance().getItemRenderer();
-        itemRenderer.zLevel = 100.0F;
+        itemRenderer.blitOffset = 100.0F;
 
         if (Config.GENERAL.ALIGN_MODE.get().name().toLowerCase().contains("right")) {
-            itemRenderer.renderItemAndEffectIntoGUI(itemStack, x - (iconWidth + padWidth), y);
-            HUDUtils.renderItemOverlayIntoGUI(minecraft.fontRenderer, itemStack, x - (iconWidth + padWidth), y, itemRenderer.zLevel, Config.GENERAL.SHOW_DAMAGE_OVERLAY.get(), Config.GENERAL.SHOW_ITEM_COUNT.get());
+            itemRenderer.renderAndDecorateItem(itemStack, x - (iconWidth + padWidth), y);
+            HUDUtils.renderItemOverlayIntoGUI(minecraft.font, itemStack, x - (iconWidth + padWidth), y, itemRenderer.blitOffset, Config.GENERAL.SHOW_DAMAGE_OVERLAY.get(), Config.GENERAL.SHOW_ITEM_COUNT.get());
 
             if (Config.GENERAL.ENABLE_ITEM_NAME.get()) {
-                minecraft.fontRenderer.drawStringWithShadow(itemName + "\247r", x - (iconWidth + padWidth * 2) - itemNameWidth, y, 0xffffff);
-                minecraft.fontRenderer.drawStringWithShadow(itemDamage + "\247r", x - (iconWidth + padWidth * 2) - itemDamageWidth, y + (elementHeight / 2.0F), 0xffffff);
+                minecraft.font.drawShadow(stack, itemName + "\247r", x - (iconWidth + padWidth * 2) - itemNameWidth, y, 0xffffff);
+                minecraft.font.drawShadow(stack, itemDamage + "\247r", x - (iconWidth + padWidth * 2) - itemDamageWidth, y + (elementHeight / 2.0F), 0xffffff);
             } else {
-                minecraft.fontRenderer.drawStringWithShadow(itemDamage + "\247r", x - (iconWidth + padWidth * 2) - itemDamageWidth, y + (elementHeight / 4.0F), 0xffffff);
+                minecraft.font.drawShadow(stack, itemDamage + "\247r", x - (iconWidth + padWidth * 2) - itemDamageWidth, y + (elementHeight / 4.0F), 0xffffff);
             }
         } else {
-            itemRenderer.renderItemAndEffectIntoGUI(itemStack, x, y);
-            HUDUtils.renderItemOverlayIntoGUI(minecraft.fontRenderer, itemStack, x, y, itemRenderer.zLevel, Config.GENERAL.SHOW_DAMAGE_OVERLAY.get(), Config.GENERAL.SHOW_ITEM_COUNT.get());
+            itemRenderer.renderAndDecorateItem(itemStack, x, y);
+            HUDUtils.renderItemOverlayIntoGUI(minecraft.font, itemStack, x, y, itemRenderer.blitOffset, Config.GENERAL.SHOW_DAMAGE_OVERLAY.get(), Config.GENERAL.SHOW_ITEM_COUNT.get());
 
             if (Config.GENERAL.ENABLE_ITEM_NAME.get()) {
-                minecraft.fontRenderer.drawStringWithShadow(itemName + "\247r", x + iconWidth + padWidth, y, 0xffffff);
-                minecraft.fontRenderer.drawStringWithShadow(itemDamage + "\247r", x + iconWidth + padWidth, y + (elementHeight / 2.0F), 0xffffff);
+                minecraft.font.drawShadow(stack, itemName + "\247r", x + iconWidth + padWidth, y, 0xffffff);
+                minecraft.font.drawShadow(stack, itemDamage + "\247r", x + iconWidth + padWidth, y + (elementHeight / 2.0F), 0xffffff);
             } else {
-                minecraft.fontRenderer.drawStringWithShadow(itemDamage + "\247r", x + iconWidth + padWidth, y + (elementHeight / 4.0F), 0xffffff);
+                minecraft.font.drawShadow(stack, itemDamage + "\247r", x + iconWidth + padWidth, y + (elementHeight / 4.0F), 0xffffff);
             }
         }
     }

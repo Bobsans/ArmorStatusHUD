@@ -3,12 +3,12 @@ package bspkrs.armorstatushud.render;
 import bspkrs.armorstatushud.config.Config;
 import bspkrs.armorstatushud.utils.ColorThreshold;
 import bspkrs.armorstatushud.utils.HUDUtils;
-import com.mojang.blaze3d.matrix.MatrixStack;
+import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.ItemRenderer;
-import net.minecraft.item.ItemStack;
-import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.StringTextComponent;
+import net.minecraft.client.renderer.entity.ItemRenderer;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TextComponent;
+import net.minecraft.world.item.ItemStack;
 
 class HUDElement {
     private final Minecraft minecraft = Minecraft.getInstance();
@@ -21,7 +21,7 @@ class HUDElement {
 
     private int elementWidth;
     private int elementHeight;
-    private ITextComponent itemName = new StringTextComponent("");
+    private Component itemName = new TextComponent("");
     private int itemNameWidth;
     private String itemDamage = "";
     private int itemDamageWidth;
@@ -62,7 +62,7 @@ class HUDElement {
                 }
             }
 
-            itemDamageWidth = minecraft.font.width(HUDUtils.stripCtrl(new StringTextComponent(itemDamage)));
+            itemDamageWidth = minecraft.font.width(HUDUtils.stripCtrl(new TextComponent(itemDamage)));
             elementWidth = padWidth + iconWidth + padWidth + itemDamageWidth;
 
             if (Config.GENERAL.ENABLE_ITEM_NAME.get()) {
@@ -74,7 +74,7 @@ class HUDElement {
         }
     }
 
-    void renderToHud(MatrixStack stack, int x, int y) {
+    void renderToHud(PoseStack stack, int x, int y) {
         ItemRenderer itemRenderer = Minecraft.getInstance().getItemRenderer();
         itemRenderer.blitOffset = 100.0F;
 

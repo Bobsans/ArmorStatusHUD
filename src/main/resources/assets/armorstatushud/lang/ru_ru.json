@@ -1,6 +1,11 @@
 {
     "itemGroup.armorstatushud": "Armor Status HUD",
+
     "armorstatushud.config.title": "Конфигурация Armor Status HUD",
+
+    "armorstatushud.keys.group": "Armor Status HUD",
+    "armorstatushud.keys.open_settings": "Открыть экран настроек",
+
     "armorstatushud.config.general.enabled": "Включено",
     "armorstatushud.config.general.enabled.desc": "Включает или отключает отображение HUD.",
     "armorstatushud.config.general.alignMode": "Положение HUD",

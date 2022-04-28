@@ -6,13 +6,13 @@ import bspkrs.armorstatushud.network.ShowConfigGUIMessage;
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
-import net.minecraft.command.CommandSource;
-import net.minecraft.command.Commands;
-import net.minecraftforge.fml.network.NetworkDirection;
+import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.commands.Commands;
+import net.minecraftforge.network.NetworkDirection;
 
 
 public class CommandArmorStatus {
-    public static void register(CommandDispatcher<CommandSource> dispatcher) {
+    public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
         dispatcher.register(
             Commands
                 .literal(Reference.MODID)
@@ -20,7 +20,7 @@ public class CommandArmorStatus {
         );
     }
 
-    private static int showConfig(CommandSource source) throws CommandSyntaxException {
+    private static int showConfig(CommandSourceStack source) throws CommandSyntaxException {
         NetworkingManager.CHANNEL.sendTo(
             new ShowConfigGUIMessage(ShowConfigGUIMessage.SHOW),
             source.getPlayerOrException().connection.getConnection(),

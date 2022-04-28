@@ -1,8 +1,8 @@
 package bspkrs.armorstatushud.network;
 
 import bspkrs.armorstatushud.gui.ConfigGUI;
-import net.minecraft.network.PacketBuffer;
-import net.minecraftforge.fml.network.NetworkEvent;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraftforge.network.NetworkEvent;
 
 import java.util.function.Supplier;
 
@@ -15,11 +15,11 @@ public class ShowConfigGUIMessage {
         this.data = data;
     }
 
-    public static ShowConfigGUIMessage read(PacketBuffer buffer) {
+    public static ShowConfigGUIMessage read(FriendlyByteBuf buffer) {
         return new ShowConfigGUIMessage(buffer.readByte());
     }
 
-    public static void write(ShowConfigGUIMessage message, PacketBuffer buffer) {
+    public static void write(ShowConfigGUIMessage message, FriendlyByteBuf buffer) {
         buffer.writeByte(message.data);
     }
 

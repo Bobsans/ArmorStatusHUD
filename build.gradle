@@ -1,31 +1,37 @@
 buildscript {
     repositories {
-        maven { url = 'https://files.minecraftforge.net/maven' }
-        jcenter()
+        maven { url = 'https://maven.minecraftforge.net' }
         mavenCentral()
     }
     dependencies {
-        classpath group: 'net.minecraftforge.gradle', name: 'ForgeGradle', version: '4.1.+', changing: true
+        classpath group: 'net.minecraftforge.gradle', name: 'ForgeGradle', version: '5.1.+', changing: true
     }
 }
+
+plugins {
+    id 'idea'
+    id 'maven-publish'
+}
 apply plugin: 'net.minecraftforge.gradle'
-apply plugin: 'idea'
 
-version = '1.4.0'
+
+version = '1.5.0'
 group = 'bspkrs.armorstatushud'
-archivesBaseName = "[1.16.5] Armor Status HUD"
+archivesBaseName = "[1.18.2] Armor Status HUD"
 
-java.toolchain.languageVersion = JavaLanguageVersion.of(8)
-println('Java: ' + System.getProperty('java.version') + ' JVM: ' + System.getProperty('java.vm.version') + '(' + System.getProperty('java.vendor') + ') Arch: ' + System.getProperty('os.arch'))
+java.toolchain.languageVersion = JavaLanguageVersion.of(17)
+println "Java: ${System.getProperty 'java.version'}, JVM: ${System.getProperty 'java.vm.version'} (${System.getProperty 'java.vendor'}), Arch: ${System.getProperty 'os.arch'}"
 
 minecraft {
-    mappings channel: 'official', version: '1.16.5'
+    mappings channel: 'official', version: '1.18.2'
 
     runs {
         client {
+            workingDirectory project.file('run')
             property 'forge.logging.markers', 'REGISTRIES'
             property 'forge.logging.console.level', 'debug'
-            workingDirectory project.file('run')
+            property 'forge.enabledGameTestNamespaces', 'armorstatushud'
+
             mods {
                 armorstatushud {
                     source sourceSets.main
@@ -37,6 +43,21 @@ minecraft {
             workingDirectory project.file('run')
             property 'forge.logging.markers', 'REGISTRIES'
             property 'forge.logging.console.level', 'debug'
+            property 'forge.enabledGameTestNamespaces', 'armorstatushud'
+
+            mods {
+                armorstatushud {
+                    source sourceSets.main
+                }
+            }
+        }
+
+        gameTestServer {
+            workingDirectory project.file('run')
+            property 'forge.logging.markers', 'REGISTRIES'
+            property 'forge.logging.console.level', 'debug'
+            property 'forge.enabledGameTestNamespaces', 'armorstatushud'
+
             mods {
                 armorstatushud {
                     source sourceSets.main
@@ -48,7 +69,7 @@ minecraft {
             workingDirectory project.file('run')
             property 'forge.logging.markers', 'REGISTRIES'
             property 'forge.logging.console.level', 'debug'
-            args '--mod', 'armorstatushud', '--all', '--output', file('src/generated/resources/')
+            args '--mod', 'armorstatushud', '--all', '--output', file('src/generated/resources/'), '--existing', file('src/main/resources/')
 
             mods {
                 armorstatushud {
@@ -59,9 +80,12 @@ minecraft {
     }
 }
 
+
+sourceSets.main.resources { srcDir 'src/generated/resources' }
+
 dependencies {
-    minecraft "net.minecraftforge:forge:1.16.5-36.1.2"
-    compile files("../BobLib/build/libs/[1.16.5] BobLib-0.2.0-deobf.jar")
+    minecraft 'net.minecraftforge:forge:1.18.2-40.1.0'
+    compileOnly files('../BobLib/build/libs/[1.18.2] BobLib-0.3.0-deobf.jar')
 }
 
 jar {
@@ -69,9 +93,9 @@ jar {
         attributes([
             "Specification-Title"     : "Armor Status HUD",
             "Specification-Vendor"    : "bspkrs, Bobsans",
-            "Specification-Version"   : "1.16.5-1.4.0",
+            "Specification-Version"   : "1",
             "Implementation-Title"    : project.name,
-            "Implementation-Version"  : "${archiveVersion}",
+            "Implementation-Version"  : project.jar.archiveVersion,
             "Implementation-Vendor"   : "bspkrs, Bobsans",
             "Implementation-Timestamp": new Date().format("yyyy-MM-dd'T'HH:mm:ssZ")
         ])
@@ -79,3 +103,20 @@ jar {
 }
 
 jar.finalizedBy('reobfJar')
+
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            artifact jar
+        }
+    }
+    repositories {
+        maven {
+            url "file://${project.projectDir}/mcmodsrepo"
+        }
+    }
+}
+
+tasks.withType(JavaCompile).configureEach {
+    options.encoding = 'UTF-8'
+}

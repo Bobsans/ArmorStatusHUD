@@ -3,11 +3,10 @@ package bspkrs.armorstatushud.render;
 import bspkrs.armorstatushud.ArmorStatusHUD;
 import bspkrs.armorstatushud.config.Config;
 import bspkrs.armorstatushud.utils.ColorThreshold;
-import com.mojang.blaze3d.matrix.MatrixStack;
+import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.screen.ChatScreen;
-import net.minecraft.item.ItemStack;
-import org.lwjgl.opengl.GL11;
+import net.minecraft.client.gui.screens.ChatScreen;
+import net.minecraft.world.item.ItemStack;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -41,9 +40,7 @@ class RenderHandler {
 
     static boolean onTickInGame(Minecraft minecraft) {
         if (Config.GENERAL.ENABLED.get() && (minecraft.screen == null || ((minecraft.screen instanceof ChatScreen) && Config.GENERAL.SHOW_IN_CHAT.get())) /*&& !minecraft.gameSettings.showDebugInfo*/) {
-            GL11.glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
             displayArmorStatus(minecraft);
-            GL11.glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
         }
 
         return true;
@@ -83,7 +80,7 @@ class RenderHandler {
                 } else if (i == -2 && Config.GENERAL.SHOW_OFFHAND_ITEM.get()) {
                     stack = minecraft.player.getOffhandItem();
                 } else if (i != -1 && i != -2) {
-                    stack = minecraft.player.inventory.armor.get(i);
+                    stack = minecraft.player.getInventory().armor.get(i);
                 }
 
                 if (stack != null && !stack.isEmpty()) {
@@ -105,20 +102,20 @@ class RenderHandler {
 
             if (Config.GENERAL.LIST_MODE.get() == Config.ListMode.VERTICAL) {
                 int yBase = getY(elements.size(), yOffset);
-                MatrixStack matrixstack = new MatrixStack();
+                PoseStack poseStack = new PoseStack();
 
                 for (HUDElement element : elements) {
-                    element.renderToHud(matrixstack, Config.GENERAL.ALIGN_MODE.get().name().toLowerCase().contains("right") ? getX(0) : getX(element.width()), yBase);
+                    element.renderToHud(poseStack, Config.GENERAL.ALIGN_MODE.get().name().toLowerCase().contains("right") ? getX(0) : getX(element.width()), yBase);
                     yBase += yOffset;
                 }
             } else if (Config.GENERAL.LIST_MODE.get() == Config.ListMode.HORIZONTAL) {
                 int xBase = getX(getElementsWidth());
                 int yBase = getY(1, yOffset);
                 int prevX = 0;
-                MatrixStack matrixstack = new MatrixStack();
+                PoseStack poseStack = new PoseStack();
 
                 for (HUDElement element : elements) {
-                    element.renderToHud(matrixstack, xBase + prevX + (Config.GENERAL.ALIGN_MODE.get().name().toLowerCase().contains("right") ? element.width() : 0), yBase);
+                    element.renderToHud(poseStack, xBase + prevX + (Config.GENERAL.ALIGN_MODE.get().name().toLowerCase().contains("right") ? element.width() : 0), yBase);
                     prevX += element.width();
                 }
             }

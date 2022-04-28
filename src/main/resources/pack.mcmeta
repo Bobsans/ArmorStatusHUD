@@ -1,6 +1,6 @@
 {
     "pack": {
-        "pack_format": 6,
-        "description": "ArmorStatusHUD"
+        "description": "ArmorStatusHUD",
+        "pack_format": 9
     }
 }

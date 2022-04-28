@@ -3,6 +3,9 @@
 
     "armorstatushud.config.title": "Armor Status HUD config",
 
+    "armorstatushud.keys.group": "Armor Status HUD",
+    "armorstatushud.keys.open_settings": "Open settings screen",
+
     "armorstatushud.config.general.enabled": "Enabled",
     "armorstatushud.config.general.enabled.desc": "Enables or disables the Armor Status HUD display.",
     "armorstatushud.config.general.alignMode": "HUD Position",

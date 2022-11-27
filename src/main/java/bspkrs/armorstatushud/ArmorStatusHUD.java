@@ -6,6 +6,7 @@ import bspkrs.armorstatushud.network.NetworkingManager;
 import bspkrs.armorstatushud.proxy.ClientProxy;
 import bspkrs.armorstatushud.proxy.IProxy;
 import bspkrs.armorstatushud.proxy.ServerProxy;
+import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.RegisterCommandsEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -32,7 +33,6 @@ public class ArmorStatusHUD {
 
     private void setup(final FMLCommonSetupEvent event) {
         NetworkingManager.init();
-
         proxy.setup(event);
     }
 

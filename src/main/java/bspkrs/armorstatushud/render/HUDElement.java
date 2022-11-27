@@ -7,7 +7,6 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.entity.ItemRenderer;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TextComponent;
 import net.minecraft.world.item.ItemStack;
 
 class HUDElement {
@@ -21,7 +20,7 @@ class HUDElement {
 
     private int elementWidth;
     private int elementHeight;
-    private Component itemName = new TextComponent("");
+    private Component itemName = Component.literal("");
     private int itemNameWidth;
     private String itemDamage = "";
     private int itemDamageWidth;
@@ -62,7 +61,7 @@ class HUDElement {
                 }
             }
 
-            itemDamageWidth = minecraft.font.width(HUDUtils.stripCtrl(new TextComponent(itemDamage)));
+            itemDamageWidth = minecraft.font.width(HUDUtils.stripCtrl(Component.literal(itemDamage)));
             elementWidth = padWidth + iconWidth + padWidth + itemDamageWidth;
 
             if (Config.GENERAL.ENABLE_ITEM_NAME.get()) {
@@ -83,20 +82,20 @@ class HUDElement {
             HUDUtils.renderItemOverlayIntoGUI(minecraft.font, itemStack, x - (iconWidth + padWidth), y, itemRenderer.blitOffset, Config.GENERAL.SHOW_DAMAGE_OVERLAY.get(), Config.GENERAL.SHOW_ITEM_COUNT.get());
 
             if (Config.GENERAL.ENABLE_ITEM_NAME.get()) {
-                minecraft.font.drawShadow(stack, itemName + "\247r", x - (iconWidth + padWidth * 2) - itemNameWidth, y, 0xffffff);
-                minecraft.font.drawShadow(stack, itemDamage + "\247r", x - (iconWidth + padWidth * 2) - itemDamageWidth, y + (elementHeight / 2.0F), 0xffffff);
+                minecraft.font.drawShadow(stack, itemName, x - (iconWidth + padWidth * 2) - itemNameWidth, y, 0xffffff);
+                minecraft.font.drawShadow(stack, itemDamage, x - (iconWidth + padWidth * 2) - itemDamageWidth, y + (elementHeight / 2.0F), 0xffffff);
             } else {
-                minecraft.font.drawShadow(stack, itemDamage + "\247r", x - (iconWidth + padWidth * 2) - itemDamageWidth, y + (elementHeight / 4.0F), 0xffffff);
+                minecraft.font.drawShadow(stack, itemDamage, x - (iconWidth + padWidth * 2) - itemDamageWidth, y + (elementHeight / 4.0F), 0xffffff);
             }
         } else {
             itemRenderer.renderAndDecorateItem(itemStack, x, y);
             HUDUtils.renderItemOverlayIntoGUI(minecraft.font, itemStack, x, y, itemRenderer.blitOffset, Config.GENERAL.SHOW_DAMAGE_OVERLAY.get(), Config.GENERAL.SHOW_ITEM_COUNT.get());
 
             if (Config.GENERAL.ENABLE_ITEM_NAME.get()) {
-                minecraft.font.drawShadow(stack, itemName + "\247r", x + iconWidth + padWidth, y, 0xffffff);
-                minecraft.font.drawShadow(stack, itemDamage + "\247r", x + iconWidth + padWidth, y + (elementHeight / 2.0F), 0xffffff);
+                minecraft.font.drawShadow(stack, itemName, x + iconWidth + padWidth, y, 0xffffff);
+                minecraft.font.drawShadow(stack, itemDamage, x + iconWidth + padWidth, y + (elementHeight / 2.0F), 0xffffff);
             } else {
-                minecraft.font.drawShadow(stack, itemDamage + "\247r", x + iconWidth + padWidth, y + (elementHeight / 4.0F), 0xffffff);
+                minecraft.font.drawShadow(stack, itemDamage, x + iconWidth + padWidth, y + (elementHeight / 4.0F), 0xffffff);
             }
         }
     }

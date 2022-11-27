@@ -5,7 +5,6 @@ import com.mojang.blaze3d.vertex.*;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TextComponent;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -88,7 +87,7 @@ public class HUDUtils {
         return count;
     }
 
-    public static <T extends Component> TextComponent stripCtrl(T text) {
-        return new TextComponent(text.getString().replaceAll("(?i)\247[0-9a-fklmnor]", ""));
+    public static <T extends Component> Component stripCtrl(T text) {
+        return Component.literal(text.getString().replaceAll("(?i)\247[0-9a-fklmnor]", ""));
     }
 }

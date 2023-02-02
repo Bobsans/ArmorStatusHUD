@@ -4,15 +4,15 @@ plugins {
     id 'net.minecraftforge.gradle' version '5.1.+'
 }
 
-version = '1.5.1'
+version = '1.5.2'
 group = 'bspkrs.armorstatushud'
-archivesBaseName = "[1.19.2] Armor Status HUD"
+archivesBaseName = "[1.19.3] Armor Status HUD"
 
 java.toolchain.languageVersion = JavaLanguageVersion.of(17)
 println "Java: ${System.getProperty 'java.version'}, JVM: ${System.getProperty 'java.vm.version'} (${System.getProperty 'java.vendor'}), Arch: ${System.getProperty 'os.arch'}"
 
 minecraft {
-    mappings channel: 'official', version: '1.19.2'
+    mappings channel: 'official', version: '1.19.3'
 
     runs {
         client {
@@ -73,8 +73,8 @@ minecraft {
 sourceSets.main.resources { srcDir 'src/generated/resources' }
 
 dependencies {
-    minecraft 'net.minecraftforge:forge:1.19.2-43.1.7'
-    compileOnly fg.deobf(files('../BobLib/build/libs/[1.19.2] BobLib-0.3.1.jar'))
+    minecraft 'net.minecraftforge:forge:1.19.3-44.1.0'
+    implementation files('../BobLib/build/libs/[1.19.3] BobLib-0.3.2-deobf.jar')
 }
 
 jar {

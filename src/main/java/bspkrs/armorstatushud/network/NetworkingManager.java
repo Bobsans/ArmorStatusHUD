@@ -1,6 +1,7 @@
 package bspkrs.armorstatushud.network;
 
 import bspkrs.armorstatushud.Reference;
+import bspkrs.armorstatushud.network.message.ShowConfigScreenMessage;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.network.NetworkRegistry;
 import net.minecraftforge.network.simple.SimpleChannel;
@@ -18,16 +19,10 @@ public class NetworkingManager {
         CHANNEL = NetworkRegistry.newSimpleChannel(
             new ResourceLocation(Reference.MODID, "main"),
             () -> Reference.VERSION,
-            (s) -> true,
-            (s) -> true
+            (version) -> version.equals(Reference.VERSION),
+            (version) -> version.equals(Reference.VERSION)
         );
 
-        CHANNEL.registerMessage(
-            nextId(),
-            ShowConfigGUIMessage.class,
-            ShowConfigGUIMessage::write,
-            ShowConfigGUIMessage::read,
-            ShowConfigGUIMessage.Handler::onMessage
-        );
+        CHANNEL.registerMessage(nextId(), ShowConfigScreenMessage.class, ShowConfigScreenMessage::encode, ShowConfigScreenMessage::decode, ShowConfigScreenMessage::handle);
     }
 }

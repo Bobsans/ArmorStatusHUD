@@ -19,12 +19,12 @@ class RenderHandler {
         List<ColorThreshold> colorList = new ArrayList<>();
 
         try {
-            for (String s : Config.GENERAL.DAMAGE_COLOR_LIST.get().split(";")) {
+            for (String s : Config.Client.DAMAGE_COLOR_LIST.get().split(";")) {
                 String[] ct = s.split(",");
                 colorList.add(new ColorThreshold(Integer.parseInt(ct[0].trim()), ct[1].trim()));
             }
         } catch (Throwable e) {
-            ArmorStatusHUD.LOGGER.warn("Error encountered parsing damageColorList: " + Config.GENERAL.DAMAGE_COLOR_LIST.get());
+            ArmorStatusHUD.LOGGER.warn("Error encountered parsing damageColorList: " + Config.Client.DAMAGE_COLOR_LIST.get());
             ArmorStatusHUD.LOGGER.warn("Reverting to defaultColorList: " + Config.DEFAULT_COLOR_LIST);
 
             for (String s : Config.DEFAULT_COLOR_LIST.split(";")) {
@@ -39,7 +39,8 @@ class RenderHandler {
     }
 
     static boolean onTickInGame(Minecraft minecraft) {
-        if (Config.GENERAL.ENABLED.get() && (minecraft.screen == null || ((minecraft.screen instanceof ChatScreen) && Config.GENERAL.SHOW_IN_CHAT.get())) /*&& !minecraft.gameSettings.showDebugInfo*/) {
+        boolean showInChat = (minecraft.screen instanceof ChatScreen) && Config.Client.SHOW_IN_CHAT.get();
+        if (Config.Client.ENABLED.get() && (minecraft.screen == null || showInChat) && !minecraft.options.hideGui) {
             displayArmorStatus(minecraft);
         }
 
@@ -47,24 +48,28 @@ class RenderHandler {
     }
 
     private static int getX(int width) {
-        if (Config.GENERAL.ALIGN_MODE.get().name().toLowerCase().contains("center")) {
-            return ((Minecraft.getInstance().getWindow().getGuiScaledWidth() / 2) - (width / 2)) + (Config.GENERAL.APPLY_X_OFFSET_TO_CENTER.get() ? Config.GENERAL.X_OFFSET.get() : 0);
-        } else if (Config.GENERAL.ALIGN_MODE.get().name().toLowerCase().contains("right")) {
-            return Minecraft.getInstance().getWindow().getGuiScaledWidth() - width - Config.GENERAL.X_OFFSET.get();
+        String alignMode = Config.Client.ALIGN_MODE.get().name().toLowerCase();
+
+        if (alignMode.contains("center")) {
+            return ((Minecraft.getInstance().getWindow().getGuiScaledWidth() / 2) - (width / 2)) + (Config.Client.APPLY_X_OFFSET_TO_CENTER.get() ? Config.Client.X_OFFSET.get() : 0);
+        } else if (alignMode.contains("right")) {
+            return Minecraft.getInstance().getWindow().getGuiScaledWidth() - width - Config.Client.X_OFFSET.get();
         } else {
-            return Config.GENERAL.X_OFFSET.get();
+            return Config.Client.X_OFFSET.get();
         }
     }
 
     private static int getY(int rowCount, int height) {
-        if (Config.GENERAL.ALIGN_MODE.get().name().toLowerCase().contains("middle")) {
-            return ((Minecraft.getInstance().getWindow().getGuiScaledHeight() / 2) - ((rowCount * height) / 2)) + (Config.GENERAL.APPLY_Y_OFFSET_TO_MIDDLE.get() ? Config.GENERAL.Y_OFFSET.get() : 0);
-        } else if (Config.GENERAL.ALIGN_MODE.get().name().equalsIgnoreCase("bottomleft") || Config.GENERAL.ALIGN_MODE.get().name().equalsIgnoreCase("bottomright")) {
-            return Minecraft.getInstance().getWindow().getGuiScaledHeight() - (rowCount * height) - Config.GENERAL.Y_OFFSET.get();
-        } else if (Config.GENERAL.ALIGN_MODE.get().name().equalsIgnoreCase("bottomcenter")) {
-            return Minecraft.getInstance().getWindow().getGuiScaledHeight() - (rowCount * height) - Config.GENERAL.Y_OFFSET_BOTTOM_CENTER.get();
+        String alignMode = Config.Client.ALIGN_MODE.get().name().toLowerCase();
+
+        if (alignMode.contains("middle")) {
+            return ((Minecraft.getInstance().getWindow().getGuiScaledHeight() / 2) - ((rowCount * height) / 2)) + (Config.Client.APPLY_Y_OFFSET_TO_MIDDLE.get() ? Config.Client.Y_OFFSET.get() : 0);
+        } else if (alignMode.equals("bottomleft") || alignMode.equals("bottomright")) {
+            return Minecraft.getInstance().getWindow().getGuiScaledHeight() - (rowCount * height) - Config.Client.Y_OFFSET.get();
+        } else if (alignMode.equals("bottomcenter")) {
+            return Minecraft.getInstance().getWindow().getGuiScaledHeight() - (rowCount * height) - Config.Client.Y_OFFSET_BOTTOM_CENTER.get();
         } else {
-            return Config.GENERAL.Y_OFFSET.get();
+            return Config.Client.Y_OFFSET.get();
         }
     }
 
@@ -75,9 +80,9 @@ class RenderHandler {
             for (int i = 3; i >= -2; i--) {
                 ItemStack stack = null;
 
-                if (i == -1 && Config.GENERAL.SHOW_EQUIPPED_ITEM.get()) {
+                if (i == -1 && Config.Client.SHOW_EQUIPPED_ITEM.get()) {
                     stack = minecraft.player.getMainHandItem();
-                } else if (i == -2 && Config.GENERAL.SHOW_OFFHAND_ITEM.get()) {
+                } else if (i == -2 && Config.Client.SHOW_OFFHAND_ITEM.get()) {
                     stack = minecraft.player.getOffhandItem();
                 } else if (i != -1 && i != -2) {
                     stack = minecraft.player.getInventory().armor.get(i);
@@ -98,24 +103,24 @@ class RenderHandler {
         getHUDElements(minecraft);
 
         if (elements.size() > 0) {
-            int yOffset = Config.GENERAL.ENABLE_ITEM_NAME.get() ? 18 : 16;
+            int yOffset = Config.Client.SHOW_ITEM_NAME.get() ? 18 : 16;
 
-            if (Config.GENERAL.LIST_MODE.get() == Config.ListMode.VERTICAL) {
+            if (Config.Client.LIST_MODE.get() == Config.ListMode.VERTICAL) {
                 int yBase = getY(elements.size(), yOffset);
                 PoseStack poseStack = new PoseStack();
 
                 for (HUDElement element : elements) {
-                    element.renderToHud(poseStack, Config.GENERAL.ALIGN_MODE.get().name().toLowerCase().contains("right") ? getX(0) : getX(element.width()), yBase);
+                    element.renderToHud(poseStack, Config.Client.ALIGN_MODE.get().name().toLowerCase().contains("right") ? getX(0) : getX(element.width()), yBase);
                     yBase += yOffset;
                 }
-            } else if (Config.GENERAL.LIST_MODE.get() == Config.ListMode.HORIZONTAL) {
+            } else if (Config.Client.LIST_MODE.get() == Config.ListMode.HORIZONTAL) {
                 int xBase = getX(getElementsWidth());
                 int yBase = getY(1, yOffset);
                 int prevX = 0;
                 PoseStack poseStack = new PoseStack();
 
                 for (HUDElement element : elements) {
-                    element.renderToHud(poseStack, xBase + prevX + (Config.GENERAL.ALIGN_MODE.get().name().toLowerCase().contains("right") ? element.width() : 0), yBase);
+                    element.renderToHud(poseStack, xBase + prevX + (Config.Client.ALIGN_MODE.get().name().toLowerCase().contains("right") ? element.width() : 0), yBase);
                     prevX += element.width();
                 }
             }

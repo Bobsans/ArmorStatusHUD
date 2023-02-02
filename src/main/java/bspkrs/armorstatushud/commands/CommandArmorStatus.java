@@ -2,7 +2,7 @@ package bspkrs.armorstatushud.commands;
 
 import bspkrs.armorstatushud.Reference;
 import bspkrs.armorstatushud.network.NetworkingManager;
-import bspkrs.armorstatushud.network.ShowConfigGUIMessage;
+import bspkrs.armorstatushud.network.message.ShowConfigScreenMessage;
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
@@ -22,7 +22,7 @@ public class CommandArmorStatus {
 
     private static int showConfig(CommandSourceStack source) throws CommandSyntaxException {
         NetworkingManager.CHANNEL.sendTo(
-            new ShowConfigGUIMessage(ShowConfigGUIMessage.SHOW),
+            ShowConfigScreenMessage.INSTANCE,
             source.getPlayerOrException().connection.getConnection(),
             NetworkDirection.PLAY_TO_CLIENT
         );

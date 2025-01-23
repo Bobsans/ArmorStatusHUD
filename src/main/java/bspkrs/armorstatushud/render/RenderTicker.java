@@ -1,27 +1,18 @@
 package bspkrs.armorstatushud.render;
 
-import bspkrs.armorstatushud.Reference;
+import bspkrs.armorstatushud.ArmorStatusHUD;
+import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.Minecraft;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
+import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.resources.ResourceLocation;
+import net.neoforged.neoforge.client.event.RegisterGuiLayersEvent;
 
-@Mod.EventBusSubscriber(modid = Reference.MODID, value = Dist.CLIENT)
 public class RenderTicker {
-    private final Minecraft minecraft;
-
-    public RenderTicker(Minecraft minecraft) {
-        this.minecraft = minecraft;
+    public static void render(GuiGraphics graphics, DeltaTracker deltaTracker) {
+        RenderHandler.onTickInGame(graphics, Minecraft.getInstance());
     }
 
-    @SubscribeEvent
-    public void onTick(TickEvent.RenderTickEvent event) {
-        if (event.phase == TickEvent.Phase.END) {
-            if (!RenderHandler.onTickInGame(minecraft)) {
-                MinecraftForge.EVENT_BUS.unregister(this);
-            }
-        }
+    public static void onRegisterGuiLayer(RegisterGuiLayersEvent event) {
+        event.registerBelowAll(ResourceLocation.fromNamespaceAndPath(ArmorStatusHUD.MOD_ID, "gui"), RenderTicker::render);
     }
 }

@@ -1,38 +1,42 @@
 package bspkrs.armorstatushud.config;
 
-import net.minecraftforge.common.ForgeConfigSpec;
-import net.minecraftforge.fml.ModLoadingContext;
-import net.minecraftforge.fml.config.ModConfig;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.fml.ModContainer;
+import net.neoforged.fml.config.ModConfig;
+import net.neoforged.fml.loading.FMLEnvironment;
+import net.neoforged.neoforge.client.gui.ConfigurationScreen;
+import net.neoforged.neoforge.client.gui.IConfigScreenFactory;
+import net.neoforged.neoforge.common.ModConfigSpec;
 
 public class Config {
     public static final String DEFAULT_COLOR_LIST = "100,f; 80,7; 60,e; 40,6; 25,c; 10,4";
 
     public static class Client {
-        protected static ForgeConfigSpec SPEC;
+        protected static ModConfigSpec SPEC;
 
-        public static ForgeConfigSpec.BooleanValue ENABLED;
-        public static ForgeConfigSpec.EnumValue<AlignMode> ALIGN_MODE;
-        public static ForgeConfigSpec.EnumValue<ListMode> LIST_MODE;
-        public static ForgeConfigSpec.BooleanValue SHOW_ITEM_NAME;
-        public static ForgeConfigSpec.BooleanValue SHOW_DAMAGE_OVERLAY;
-        public static ForgeConfigSpec.BooleanValue SHOW_ITEM_COUNT;
-        public static ForgeConfigSpec.ConfigValue<String> DAMAGE_COLOR_LIST;
-        public static ForgeConfigSpec.EnumValue<DamageDisplayType> DAMAGE_DISPLAY_TYPE;
-        public static ForgeConfigSpec.EnumValue<DamageTresholdType> DAMAGE_THRESHOLD_TYPE;
-        public static ForgeConfigSpec.BooleanValue SHOW_ITEM_DAMAGE;
-        public static ForgeConfigSpec.BooleanValue SHOW_ARMOR_DAMAGE;
-        public static ForgeConfigSpec.BooleanValue SHOW_MAX_DAMAGE;
-        public static ForgeConfigSpec.BooleanValue SHOW_EQUIPPED_ITEM;
-        public static ForgeConfigSpec.BooleanValue SHOW_OFFHAND_ITEM;
-        public static ForgeConfigSpec.IntValue X_OFFSET;
-        public static ForgeConfigSpec.IntValue Y_OFFSET;
-        public static ForgeConfigSpec.IntValue Y_OFFSET_BOTTOM_CENTER;
-        public static ForgeConfigSpec.BooleanValue APPLY_X_OFFSET_TO_CENTER;
-        public static ForgeConfigSpec.BooleanValue APPLY_Y_OFFSET_TO_MIDDLE;
-        public static ForgeConfigSpec.BooleanValue SHOW_IN_CHAT;
+        public static ModConfigSpec.BooleanValue ENABLED;
+        public static ModConfigSpec.EnumValue<AlignMode> ALIGN_MODE;
+        public static ModConfigSpec.EnumValue<ListMode> LIST_MODE;
+        public static ModConfigSpec.BooleanValue SHOW_ITEM_NAME;
+        public static ModConfigSpec.BooleanValue SHOW_DAMAGE_OVERLAY;
+        public static ModConfigSpec.BooleanValue SHOW_ITEM_COUNT;
+        public static ModConfigSpec.ConfigValue<String> DAMAGE_COLOR_LIST;
+        public static ModConfigSpec.EnumValue<DamageDisplayType> DAMAGE_DISPLAY_TYPE;
+        public static ModConfigSpec.EnumValue<DamageTresholdType> DAMAGE_THRESHOLD_TYPE;
+        public static ModConfigSpec.BooleanValue SHOW_ITEM_DAMAGE;
+        public static ModConfigSpec.BooleanValue SHOW_ARMOR_DAMAGE;
+        public static ModConfigSpec.BooleanValue SHOW_MAX_DAMAGE;
+        public static ModConfigSpec.BooleanValue SHOW_EQUIPPED_ITEM;
+        public static ModConfigSpec.BooleanValue SHOW_OFFHAND_ITEM;
+        public static ModConfigSpec.IntValue X_OFFSET;
+        public static ModConfigSpec.IntValue Y_OFFSET;
+        public static ModConfigSpec.IntValue Y_OFFSET_BOTTOM_CENTER;
+        public static ModConfigSpec.BooleanValue APPLY_X_OFFSET_TO_CENTER;
+        public static ModConfigSpec.BooleanValue APPLY_Y_OFFSET_TO_MIDDLE;
+        public static ModConfigSpec.BooleanValue SHOW_IN_CHAT;
 
         static {
-            ForgeConfigSpec.Builder builder = new ForgeConfigSpec.Builder();
+            ModConfigSpec.Builder builder = new ModConfigSpec.Builder();
 
             builder.push("general");
 
@@ -123,8 +127,12 @@ public class Config {
         }
     }
 
-    public static void register(final ModLoadingContext context) {
-        context.registerConfig(ModConfig.Type.CLIENT, Client.SPEC);
+    public static void register(final ModContainer container) {
+        container.registerConfig(ModConfig.Type.CLIENT, Client.SPEC);
+
+        if (FMLEnvironment.dist == Dist.CLIENT) {
+            container.registerExtensionPoint(IConfigScreenFactory.class, ConfigurationScreen::new);
+        }
     }
 
     public enum AlignMode {

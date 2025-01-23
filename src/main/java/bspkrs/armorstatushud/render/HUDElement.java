@@ -3,9 +3,8 @@ package bspkrs.armorstatushud.render;
 import bspkrs.armorstatushud.config.Config;
 import bspkrs.armorstatushud.utils.ColorThreshold;
 import bspkrs.armorstatushud.utils.HUDUtils;
-import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.entity.ItemRenderer;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.ItemStack;
 
@@ -39,10 +38,6 @@ class HUDElement {
         return elementWidth;
     }
 
-    int height() {
-        return elementHeight;
-    }
-
     private void initSize() {
         elementHeight = Config.Client.SHOW_ITEM_NAME.get() ? Math.max(Minecraft.getInstance().font.lineHeight * 2, iconHeight) : Math.max(minecraft.font.lineHeight, iconHeight);
 
@@ -73,30 +68,29 @@ class HUDElement {
         }
     }
 
-    void renderToHud(PoseStack stack, int x, int y) {
-        ItemRenderer itemRenderer = Minecraft.getInstance().getItemRenderer();
-        itemRenderer.blitOffset = 100.0F;
-
+    void renderToHud(GuiGraphics graphics, int x, int y) {
         if (Config.Client.ALIGN_MODE.get().name().toLowerCase().contains("right")) {
-            itemRenderer.renderAndDecorateItem(this.itemStack, x - (iconWidth + padWidth), y);
-            HUDUtils.renderItemOverlayIntoGUI(minecraft.font, this.itemStack, x - (iconWidth + padWidth), y, itemRenderer.blitOffset, Config.Client.SHOW_DAMAGE_OVERLAY.get(), Config.Client.SHOW_ITEM_COUNT.get());
+            graphics.renderItem(this.itemStack, x - (iconWidth + padWidth), y, 0, 100);
+            HUDUtils.renderItemOverlayIntoGUI(graphics, minecraft.font, this.itemStack, x - (iconWidth + padWidth), y, Config.Client.SHOW_DAMAGE_OVERLAY.get(), Config.Client.SHOW_ITEM_COUNT.get());
 
             if (Config.Client.SHOW_ITEM_NAME.get()) {
-                minecraft.font.drawShadow(stack, itemName, x - (iconWidth + padWidth * 2) - itemNameWidth, y, 0xffffff);
-                minecraft.font.drawShadow(stack, itemDamage, x - (iconWidth + padWidth * 2) - itemDamageWidth, y + (elementHeight / 2.0F), 0xffffff);
+                graphics.drawString(minecraft.font, itemName, x - (iconWidth + padWidth * 2) - itemNameWidth, y, 0xffffff, true);
+                graphics.drawString(minecraft.font, itemDamage, x - (iconWidth + padWidth * 2) - itemDamageWidth, y + (elementHeight / 2.0F), 0xffffff, true);
             } else {
-                minecraft.font.drawShadow(stack, itemDamage, x - (iconWidth + padWidth * 2) - itemDamageWidth, y + (elementHeight / 4.0F), 0xffffff);
+                graphics.drawString(minecraft.font, itemDamage, x - (iconWidth + padWidth * 2) - itemDamageWidth, y + (elementHeight / 4.0F), 0xffffff, true);
             }
         } else {
-            itemRenderer.renderAndDecorateItem(this.itemStack, x, y);
-            HUDUtils.renderItemOverlayIntoGUI(minecraft.font, this.itemStack, x, y, itemRenderer.blitOffset, Config.Client.SHOW_DAMAGE_OVERLAY.get(), Config.Client.SHOW_ITEM_COUNT.get());
+            graphics.renderItem(this.itemStack, x, y, 0, 100);
+            HUDUtils.renderItemOverlayIntoGUI(graphics, minecraft.font, this.itemStack, x, y, Config.Client.SHOW_DAMAGE_OVERLAY.get(), Config.Client.SHOW_ITEM_COUNT.get());
 
             if (Config.Client.SHOW_ITEM_NAME.get()) {
-                minecraft.font.drawShadow(stack, itemName, x + iconWidth + padWidth, y, 0xffffff);
-                minecraft.font.drawShadow(stack, itemDamage, x + iconWidth + padWidth, y + (elementHeight / 2.0F), 0xffffff);
+                graphics.drawString(minecraft.font, itemName, x + iconWidth + padWidth, y, 0xffffff, true);
+                graphics.drawString(minecraft.font, itemDamage, x + iconWidth + padWidth, y + (elementHeight / 2.0F), 0xffffff, true);
             } else {
-                minecraft.font.drawShadow(stack, itemDamage, x + iconWidth + padWidth, y + (elementHeight / 4.0F), 0xffffff);
+                graphics.drawString(minecraft.font, itemDamage, x + iconWidth + padWidth, y + (elementHeight / 4.0F), 0xffffff, true);
             }
         }
+
+        graphics.flush();
     }
 }

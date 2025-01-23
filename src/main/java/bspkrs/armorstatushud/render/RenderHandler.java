@@ -3,8 +3,8 @@ package bspkrs.armorstatushud.render;
 import bspkrs.armorstatushud.ArmorStatusHUD;
 import bspkrs.armorstatushud.config.Config;
 import bspkrs.armorstatushud.utils.ColorThreshold;
-import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.ChatScreen;
 import net.minecraft.world.item.ItemStack;
 
@@ -24,8 +24,8 @@ class RenderHandler {
                 colorList.add(new ColorThreshold(Integer.parseInt(ct[0].trim()), ct[1].trim()));
             }
         } catch (Throwable e) {
-            ArmorStatusHUD.LOGGER.warn("Error encountered parsing damageColorList: " + Config.Client.DAMAGE_COLOR_LIST.get());
-            ArmorStatusHUD.LOGGER.warn("Reverting to defaultColorList: " + Config.DEFAULT_COLOR_LIST);
+            ArmorStatusHUD.LOGGER.warn("Error encountered parsing damageColorList: {}", Config.Client.DAMAGE_COLOR_LIST.get());
+            ArmorStatusHUD.LOGGER.warn("Reverting to defaultColorList: {}", Config.DEFAULT_COLOR_LIST);
 
             for (String s : Config.DEFAULT_COLOR_LIST.split(";")) {
                 String[] ct = s.split(",");
@@ -38,13 +38,12 @@ class RenderHandler {
         return colorList;
     }
 
-    static boolean onTickInGame(Minecraft minecraft) {
+    static void onTickInGame(GuiGraphics graphics, Minecraft minecraft) {
         boolean showInChat = (minecraft.screen instanceof ChatScreen) && Config.Client.SHOW_IN_CHAT.get();
-        if (Config.Client.ENABLED.get() && (minecraft.screen == null || showInChat) && !minecraft.options.hideGui) {
-            displayArmorStatus(minecraft);
-        }
 
-        return true;
+        if (Config.Client.ENABLED.get() && (minecraft.screen == null || showInChat) && !minecraft.options.hideGui) {
+            displayArmorStatus(graphics, minecraft);
+        }
     }
 
     private static int getX(int width) {
@@ -99,28 +98,26 @@ class RenderHandler {
         return elements.stream().map(HUDElement::width).reduce(0, Integer::sum);
     }
 
-    private static void displayArmorStatus(Minecraft minecraft) {
+    private static void displayArmorStatus(GuiGraphics graphics, Minecraft minecraft) {
         getHUDElements(minecraft);
 
-        if (elements.size() > 0) {
+        if (!elements.isEmpty()) {
             int yOffset = Config.Client.SHOW_ITEM_NAME.get() ? 18 : 16;
 
             if (Config.Client.LIST_MODE.get() == Config.ListMode.VERTICAL) {
                 int yBase = getY(elements.size(), yOffset);
-                PoseStack poseStack = new PoseStack();
 
                 for (HUDElement element : elements) {
-                    element.renderToHud(poseStack, Config.Client.ALIGN_MODE.get().name().toLowerCase().contains("right") ? getX(0) : getX(element.width()), yBase);
+                    element.renderToHud(graphics, Config.Client.ALIGN_MODE.get().name().toLowerCase().contains("right") ? getX(0) : getX(element.width()), yBase);
                     yBase += yOffset;
                 }
             } else if (Config.Client.LIST_MODE.get() == Config.ListMode.HORIZONTAL) {
                 int xBase = getX(getElementsWidth());
                 int yBase = getY(1, yOffset);
                 int prevX = 0;
-                PoseStack poseStack = new PoseStack();
 
                 for (HUDElement element : elements) {
-                    element.renderToHud(poseStack, xBase + prevX + (Config.Client.ALIGN_MODE.get().name().toLowerCase().contains("right") ? element.width() : 0), yBase);
+                    element.renderToHud(graphics, xBase + prevX + (Config.Client.ALIGN_MODE.get().name().toLowerCase().contains("right") ? element.width() : 0), yBase);
                     prevX += element.width();
                 }
             }

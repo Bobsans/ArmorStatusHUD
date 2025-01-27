@@ -7,7 +7,7 @@ import com.mojang.blaze3d.vertex.VertexFormat;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.client.renderer.CoreShaders;
+import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
@@ -62,7 +62,7 @@ public class HUDUtils {
         builder.addVertex(x, y + height, 0.0f).setColor(r, g, b, a);
         builder.addVertex(x + width, y + height, 0.0f).setColor(r, g, b, a);
         builder.addVertex(x + width, y, 0.0f).setColor(r, g, b, a);
-        RenderSystem.setShader(CoreShaders.POSITION_COLOR);
+        RenderSystem.setShader(GameRenderer::getPositionColorShader);
         BufferUploader.drawWithShader(builder.buildOrThrow());
     }
 

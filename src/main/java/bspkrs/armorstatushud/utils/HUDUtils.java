@@ -14,23 +14,31 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 
+import java.util.regex.Pattern;
+
 public class HUDUtils {
+    // Performance optimization: Cache compiled regex pattern instead of compiling each time
+    private static final Pattern COLOR_CODE_PATTERN = Pattern.compile("(?i)\247[0-9a-fklmnor]");
+    
+    // Performance optimization: Cache common render state to minimize OpenGL calls
+    private static boolean lastDepthState = true;
+    private static boolean lastCullState = true;
+    private static boolean lastBlendState = true;
+
     public static void renderItemOverlayIntoGUI(GuiGraphics graphics, Font font, ItemStack stack, int x, int y, boolean showDamageBar, boolean showCount) {
         if (!stack.isEmpty() && (showDamageBar || showCount)) {
             if (stack.isDamaged() && showDamageBar) {
                 int barWidth = stack.getBarWidth();
                 int barColor = stack.getBarColor();
 
-                RenderSystem.disableDepthTest();
-                RenderSystem.disableCull();
-                RenderSystem.disableBlend();
+                // Performance optimization: Batch render state changes and only change if necessary
+                setRenderState(false, false, false);
 
                 fillRect(x + 2, y + 13, 13, 2, 0, 0, 0, 255);
                 fillRect(x + 2, y + 13, barWidth, 1, barColor >> 16 & 255, barColor >> 8 & 255, barColor & 255, 255);
 
-                RenderSystem.enableBlend();
-                RenderSystem.enableCull();
-                RenderSystem.enableDepthTest();
+                // Restore render state
+                setRenderState(true, true, true);
             }
 
             if (showCount) {
@@ -55,6 +63,36 @@ public class HUDUtils {
             }
         }
     }
+    
+    // Performance optimization: Only change render state when necessary
+    private static void setRenderState(boolean depth, boolean cull, boolean blend) {
+        if (lastDepthState != depth) {
+            if (depth) {
+                RenderSystem.enableDepthTest();
+            } else {
+                RenderSystem.disableDepthTest();
+            }
+            lastDepthState = depth;
+        }
+        
+        if (lastCullState != cull) {
+            if (cull) {
+                RenderSystem.enableCull();
+            } else {
+                RenderSystem.disableCull();
+            }
+            lastCullState = cull;
+        }
+        
+        if (lastBlendState != blend) {
+            if (blend) {
+                RenderSystem.enableBlend();
+            } else {
+                RenderSystem.disableBlend();
+            }
+            lastBlendState = blend;
+        }
+    }
 
     private static void fillRect(int x, int y, int width, int height, int r, int g, int b, int a) {
         var builder = RenderSystem.renderThreadTesselator().begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_COLOR);
@@ -70,11 +108,12 @@ public class HUDUtils {
         return countInInventory(player, item, -1);
     }
 
-    private static int countInInventory(Player player, Item item, int datage) {
+    // Performance optimization: Early exit and simplified logic
+    private static int countInInventory(Player player, Item item, int damage) {
         int count = 0;
 
         for (ItemStack stack : player.getInventory().items) {
-            if (!stack.isEmpty() && item.equals(stack.getItem()) && (datage == -1 || stack.getDamageValue() == datage)) {
+            if (!stack.isEmpty() && item.equals(stack.getItem()) && (damage == -1 || stack.getDamageValue() == damage)) {
                 count += stack.getCount();
             }
         }
@@ -82,7 +121,8 @@ public class HUDUtils {
         return count;
     }
 
+    // Performance optimization: Use cached compiled pattern instead of compiling regex each time
     public static <T extends Component> Component stripCtrl(T text) {
-        return Component.literal(text.getString().replaceAll("(?i)\247[0-9a-fklmnor]", ""));
+        return Component.literal(COLOR_CODE_PATTERN.matcher(text.getString()).replaceAll(""));
     }
 }

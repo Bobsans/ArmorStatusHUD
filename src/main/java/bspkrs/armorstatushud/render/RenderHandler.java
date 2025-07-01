@@ -12,29 +12,51 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-class RenderHandler {
+public class RenderHandler {
     private static final List<HUDElement> elements = new ArrayList<>();
+    
+    // Performance optimization: Cache color list and only regenerate when config changes
+    private static List<ColorThreshold> cachedColorList = null;
+    private static String lastColorConfig = null;
+    
+    // Performance optimization: Cache element collection state
+    private static int lastInventoryChangeCount = -1;
+    private static int cachedElementsWidth = 0;
+    private static boolean elementsDirty = true;
 
     static List<ColorThreshold> getColorList() {
+        String currentColorConfig = Config.Client.DAMAGE_COLOR_LIST.get();
+        
+        // Performance optimization: Only parse color list when configuration changes
+        if (cachedColorList == null || !currentColorConfig.equals(lastColorConfig)) {
+            cachedColorList = parseColorList(currentColorConfig);
+            lastColorConfig = currentColorConfig;
+        }
+        
+        return cachedColorList;
+    }
+    
+    private static List<ColorThreshold> parseColorList(String colorConfig) {
         List<ColorThreshold> colorList = new ArrayList<>();
 
         try {
-            for (String s : Config.Client.DAMAGE_COLOR_LIST.get().split(";")) {
+            String[] colorPairs = colorConfig.split(";");
+            for (String s : colorPairs) {
                 String[] ct = s.split(",");
                 colorList.add(new ColorThreshold(Integer.parseInt(ct[0].trim()), ct[1].trim()));
             }
         } catch (Throwable e) {
-            ArmorStatusHUD.LOGGER.warn("Error encountered parsing damageColorList: {}", Config.Client.DAMAGE_COLOR_LIST.get());
+            ArmorStatusHUD.LOGGER.warn("Error encountered parsing damageColorList: {}", colorConfig);
             ArmorStatusHUD.LOGGER.warn("Reverting to defaultColorList: {}", Config.DEFAULT_COLOR_LIST);
 
-            for (String s : Config.DEFAULT_COLOR_LIST.split(";")) {
+            String[] defaultPairs = Config.DEFAULT_COLOR_LIST.split(";");
+            for (String s : defaultPairs) {
                 String[] ct = s.split(",");
                 colorList.add(new ColorThreshold(Integer.parseInt(ct[0].trim()), ct[1].trim()));
             }
         }
 
         Collections.sort(colorList);
-
         return colorList;
     }
 
@@ -73,29 +95,60 @@ class RenderHandler {
     }
 
     private static void getHUDElements(Minecraft minecraft) {
+        if (minecraft.player == null) {
+            elements.clear();
+            elementsDirty = true;
+            return;
+        }
+        
+        // Performance optimization: Only rebuild elements when inventory changes
+        // Using hashCode as a simple change detection mechanism
+        int currentInventoryHash = minecraft.player.getInventory().hashCode();
+        if (currentInventoryHash == lastInventoryChangeCount && !elementsDirty) {
+            return; // No changes, use cached elements
+        }
+        
         elements.clear();
+        elementsDirty = false;
+        lastInventoryChangeCount = currentInventoryHash;
 
-        if (minecraft.player != null) {
-            for (int i = 3; i >= -2; i--) {
-                ItemStack stack = null;
+        for (int i = 3; i >= -2; i--) {
+            ItemStack stack = null;
 
-                if (i == -1 && Config.Client.SHOW_EQUIPPED_ITEM.get()) {
-                    stack = minecraft.player.getMainHandItem();
-                } else if (i == -2 && Config.Client.SHOW_OFFHAND_ITEM.get()) {
-                    stack = minecraft.player.getOffhandItem();
-                } else if (i != -1 && i != -2) {
-                    stack = minecraft.player.getInventory().armor.get(i);
-                }
+            if (i == -1 && Config.Client.SHOW_EQUIPPED_ITEM.get()) {
+                stack = minecraft.player.getMainHandItem();
+            } else if (i == -2 && Config.Client.SHOW_OFFHAND_ITEM.get()) {
+                stack = minecraft.player.getOffhandItem();
+            } else if (i != -1 && i != -2) {
+                stack = minecraft.player.getInventory().armor.get(i);
+            }
 
-                if (stack != null && !stack.isEmpty()) {
-                    elements.add(new HUDElement(stack, 16, 16, 2, i > -1));
-                }
+            if (stack != null && !stack.isEmpty()) {
+                elements.add(new HUDElement(stack, 16, 16, 2, i > -1));
             }
         }
+        
+        // Recalculate cached width when elements change
+        cachedElementsWidth = calculateElementsWidth();
     }
 
     private static int getElementsWidth() {
-        return elements.stream().map(HUDElement::width).reduce(0, Integer::sum);
+        // Performance optimization: Use cached width if elements haven't changed
+        if (!elementsDirty && cachedElementsWidth > 0) {
+            return cachedElementsWidth;
+        }
+        
+        cachedElementsWidth = calculateElementsWidth();
+        return cachedElementsWidth;
+    }
+    
+    // Performance optimization: Replace stream with simple loop
+    private static int calculateElementsWidth() {
+        int totalWidth = 0;
+        for (HUDElement element : elements) {
+            totalWidth += element.width();
+        }
+        return totalWidth;
     }
 
     private static void displayArmorStatus(GuiGraphics graphics, Minecraft minecraft) {
@@ -122,5 +175,10 @@ class RenderHandler {
                 }
             }
         }
+    }
+    
+    // Performance optimization: Mark elements as dirty when configuration changes
+    public static void markElementsDirty() {
+        elementsDirty = true;
     }
 }
